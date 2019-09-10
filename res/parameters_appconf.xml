@@ -17,7 +17,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>0</valInt>
+            <valInt>110</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </controller_id>
@@ -97,7 +97,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>100</stepInt>
-            <valInt>500</valInt>
+            <valInt>50</valInt>
             <suffix> Hz</suffix>
             <vTx>3</vTx>
         </send_can_status_rate_hz>
@@ -183,7 +183,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The APP to use. With multiple VESC connected over CAN only the master needs to have an app to use set up. Notice that using the NRF nunchuk needs the NRF app.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_APP_TO_USE</cDefine>
-            <valInt>3</valInt>
+            <valInt>8</valInt>
             <enumNames>No App</enumNames>
             <enumNames>PPM</enumNames>
             <enumNames>ADC</enumNames>
@@ -254,7 +254,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
@@ -468,7 +468,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The curve parameter, offsets and signs are mapped accordingly for each mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_PPM_THROTTLE_EXP_MODE</cDefine>
-            <valInt>2</valInt>
+            <valInt>0</valInt>
             <enumNames>Exponential</enumNames>
             <enumNames>Natural</enumNames>
             <enumNames>Polynomial</enumNames>
@@ -490,7 +490,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.9</valDouble>
+            <valDouble>0.3</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> s</suffix>
             <vTx>9</vTx>
@@ -512,7 +512,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.3</valDouble>
+            <valDouble>0.1</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> s</suffix>
             <vTx>9</vTx>
@@ -527,7 +527,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Listen for other VESCs on the CAN-bus and send the same control commands to them. Notice that the application only has to be set up on the master VESC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_PPM_MULTI_ESC</cDefine>
-            <valInt>0</valInt>
+            <valInt>1</valInt>
         </app_ppm_conf.multi_esc>
         <app_ppm_conf.tc>
             <longName>Traction Control</longName>
@@ -976,7 +976,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.9</valDouble>
+            <valDouble>0.3</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> s</suffix>
             <vTx>9</vTx>
@@ -998,7 +998,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.3</valDouble>
+            <valDouble>0.1</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> s</suffix>
             <vTx>9</vTx>
@@ -1013,7 +1013,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Listen for other VESCs on the CAN-bus and send the same control commands to them. Notice that the application only has to be set up on the master VESC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_ADC_MULTI_ESC</cDefine>
-            <valInt>0</valInt>
+            <valInt>1</valInt>
         </app_adc_conf.multi_esc>
         <app_adc_conf.tc>
             <longName>Traction Control</longName>
@@ -1190,7 +1190,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1e+6</maxDouble>
+            <maxDouble>1e+06</maxDouble>
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>500</stepDouble>
@@ -1307,7 +1307,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Listen for other VESCs on the CAN-bus and send the same control commands to them. Notice that the application only has to be set up on the master VESC.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_CHUK_MULTI_ESC</cDefine>
-            <valInt>0</valInt>
+            <valInt>1</valInt>
         </app_chuk_conf.multi_esc>
         <app_chuk_conf.tc>
             <longName>Traction Control</longName>
@@ -1353,7 +1353,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The air bit rate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>APPCONF_NRF_SPEED</cDefine>
-            <valInt>2</valInt>
+            <valInt>1</valInt>
             <enumNames>250 Kbit/s</enumNames>
             <enumNames>1 MBit/s</enumNames>
             <enumNames>2 MBit/s</enumNames>
@@ -1530,6 +1530,106 @@ p, li { white-space: pre-wrap; }
             <cDefine>APPCONF_NRF_SEND_CRC_ACK</cDefine>
             <valInt>1</valInt>
         </app_nrf_conf.send_crc_ack>
+        <app_pedelec_conf.pedelec_max_rpm>
+            <longName>Pedelec Max RPM</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The Max RPM of the pedal sensor above which we will set throttle to its maximum.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PEDELEC_MAX_RPM</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>120</maxDouble>
+            <minDouble>40</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>100</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> RPM</suffix>
+            <vTx>9</vTx>
+        </app_pedelec_conf.pedelec_max_rpm>
+        <app_pedelec_conf.pedelec_min_rpm>
+            <longName>Pedelec Min RPM</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The Min RPM of the pedal sensor below which we will set throttle to its minimum&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PEDELEC_MIN_RPM</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>60</maxDouble>
+            <minDouble>10</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>20</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> RPM</suffix>
+            <vTx>9</vTx>
+        </app_pedelec_conf.pedelec_min_rpm>
+        <app_pedelec_conf.pedelec_magnets>
+            <longName>Pedelec Sensor Magnets</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif';&quot;&gt;The number of magnets the pedal sensor has&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PEDELEC_MAGNETS</cDefine>
+            <editorDecimalsDouble>0</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>30</maxDouble>
+            <minDouble>1</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>5</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> </suffix>
+            <vTx>9</vTx>
+        </app_pedelec_conf.pedelec_magnets>
+        <app_pedelec_conf.is_on>
+            <longName>Pedelec Is ON?</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If you want to enable the bike pedelec set to true&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PEDELEC_IS_ON</cDefine>
+            <valInt>0</valInt>
+        </app_pedelec_conf.is_on>
+        <app_pedelec_conf.max_erpm>
+            <longName>Pedelec MAX ERPM</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'DejaVu Sans'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The max ERPM you want the motor to run when the pedal frecuency is at its maximum&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PEDELEC_MAX_ERPM</cDefine>
+            <editorDecimalsDouble>0</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>10000</maxDouble>
+            <minDouble>100</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>1000</valDouble>
+            <vTxDoubleScale>1</vTxDoubleScale>
+            <suffix> ERPM</suffix>
+            <vTx>9</vTx>
+        </app_pedelec_conf.max_erpm>
     </Params>
     <SerOrder>
         <ser>controller_id</ser>
@@ -1604,5 +1704,10 @@ p, li { white-space: pre-wrap; }
         <ser>app_nrf_conf.address__1</ser>
         <ser>app_nrf_conf.address__2</ser>
         <ser>app_nrf_conf.send_crc_ack</ser>
+        <ser>app_pedelec_conf.pedelec_max_rpm</ser>
+        <ser>app_pedelec_conf.pedelec_min_rpm</ser>
+        <ser>app_pedelec_conf.pedelec_magnets</ser>
+        <ser>app_pedelec_conf.is_on</ser>
+        <ser>app_pedelec_conf.max_erpm</ser>
     </SerOrder>
 </ConfigParams>

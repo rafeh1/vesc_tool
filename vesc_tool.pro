@@ -29,7 +29,7 @@ CONFIG += c++11
 DEFINES += HAS_BLUETOOTH
 
 # CAN bus available
-DEFINES += HAS_CANBUS
+#DEFINES += HAS_CANBUS
 
 # Debug build (e.g. F5 to reload QML files)
 #DEFINES += DEBUG_BUILD
