@@ -73,12 +73,6 @@ void PageAppPpm::setVesc(VescInterface *vesc)
         ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.throttle_exp_brake");
         ui->throttleCurveTab->addParamRow(mVesc->appConfig(), "app_ppm_conf.throttle_exp_mode");
 
-        ui->PedelecConfigTable->addParamRow(mVesc->appConfig(), "app_pedelec_conf.pedelec_max_rpm");
-        ui->PedelecConfigTable->addParamRow(mVesc->appConfig(), "app_pedelec_conf.pedelec_min_rpm");
-        ui->PedelecConfigTable->addParamRow(mVesc->appConfig(), "app_pedelec_conf.pedelec_magnets");
-        ui->PedelecConfigTable->addParamRow(mVesc->appConfig(), "app_pedelec_conf.is_on");
-        ui->PedelecConfigTable->addParamRow(mVesc->appConfig(), "app_pedelec_conf.max_erpm");
-
         ui->ppmMap->setVesc(mVesc);
 
         connect(mVesc->appConfig(), SIGNAL(paramChangedDouble(QObject*,QString,double)),

@@ -20,7 +20,7 @@
       <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -78,39 +78,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="PEDELECtab">
-      <attribute name="title">
-       <string>PEDELEC Config</string>
-      </attribute>
-      <widget class="QWidget" name="verticalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>10</y>
-         <width>761</width>
-         <height>461</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
-        <item>
-         <widget class="ParamTable" name="PedelecConfigTable"/>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
-     </widget>
     </widget>
    </item>
   </layout>
@@ -122,15 +89,15 @@
    <header>widgets/paramtable.h</header>
   </customwidget>
   <customwidget>
-   <class>PpmMap</class>
-   <extends>QWidget</extends>
-   <header>widgets/ppmmap.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
    <header>widgets/qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PpmMap</class>
+   <extends>QWidget</extends>
+   <header>widgets/ppmmap.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

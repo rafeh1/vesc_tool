@@ -20,7 +20,7 @@
       <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -77,6 +77,21 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Pedelec Config</string>
+      </attribute>
+      <widget class="ParamTable" name="PedelecConfigTab">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>641</width>
+         <height>441</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>
