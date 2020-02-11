@@ -609,6 +609,19 @@ ApplicationWindow {
         }
     }
 
+    Timer {
+        id: aliveTimerMain
+        interval: 200
+        running: true
+        repeat: true
+
+        onTriggered: {
+            if (VescIf.isPortConnected()) {
+                mCommands.sendAlive()
+            }
+        }
+    }
+
     Dialog {
         id: vescDialog
         standardButtons: Dialog.Ok

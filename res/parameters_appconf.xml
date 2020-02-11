@@ -1083,7 +1083,7 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>120</maxDouble>
+            <maxDouble>200</maxDouble>
             <minDouble>40</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
@@ -1105,8 +1105,8 @@ p, li { white-space: pre-wrap; }
             <editorDecimalsDouble>2</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>60</maxDouble>
-            <minDouble>10</minDouble>
+            <maxDouble>40</maxDouble>
+            <minDouble>3</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>20</valDouble>

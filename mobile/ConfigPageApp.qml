@@ -190,6 +190,12 @@ Item {
                 createEditorApp("app_adc_conf.throttle_exp_brake")
                 createEditorApp("app_adc_conf.throttle_exp_mode")
                 break;
+            case "Pedelec Config":
+                createEditorApp("app_adc_conf.pedelec_max_rpm")
+                createEditorApp("app_adc_conf.pedelec_min_rpm")
+                createEditorApp("app_adc_conf.pedelec_magnets")
+                createEditorApp("app_adc_conf.pedelec_is_on")
+                break;
             default:
                 break;
             }
@@ -284,7 +290,8 @@ Item {
                         tabBox.model = [
                                     "General",
                                     "Mapping",
-                                    "Throttle Curve"
+                                    "Throttle Curve",
+                                    "Pedelec Config"
                                 ]
                         break;
 
