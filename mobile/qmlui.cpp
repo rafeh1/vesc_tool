@@ -1,5 +1,5 @@
 /*
-    Copyright 2017 - 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2017 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -22,6 +22,9 @@
 
 #include <QQuickStyle>
 #include <QApplication>
+#include <QQuickWindow>
+
+VescInterface *QmlUi::mVesc = nullptr;
 
 QmlUi::QmlUi(QObject *parent) : QObject(parent)
 {
@@ -48,7 +51,7 @@ bool QmlUi::startQmlUi()
 
 bool QmlUi::eventFilter(QObject *object, QEvent *e)
 {
-    Q_UNUSED(object);
+    (void)object;
 
     if (e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
@@ -61,7 +64,6 @@ bool QmlUi::eventFilter(QObject *object, QEvent *e)
                 mEngine = new QQmlApplicationEngine(this);
                 mEngine->load(QUrl(QLatin1String("mobile/main.qml")));
                 return true;
-                break;
 
             default:
                 break;
@@ -72,16 +74,29 @@ bool QmlUi::eventFilter(QObject *object, QEvent *e)
     return false;
 }
 
+void QmlUi::setVisible(bool visible)
+{
+    QObject *rootObject = mEngine->rootObjects().first();
+    QQuickWindow *window = qobject_cast<QQuickWindow *>(rootObject);
+    if (window) {
+        window->setVisible(visible);
+    }
+}
+
+VescInterface *QmlUi::vesc()
+{
+    return mVesc;
+}
+
 QObject *QmlUi::vescinterface_singletontype_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     (void)engine;
     (void)scriptEngine;
 
     VescInterface *vesc = new VescInterface();
-
-    vesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
-    vesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");
-    vesc->infoConfig()->loadParamsXml("://res/info.xml");
+    mVesc = vesc;
+    vesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    Utility::configLoadLatest(vesc);
 
     return vesc;
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2017 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2020 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -26,6 +26,7 @@
 #include <cmath>
 #include <QEventLoop>
 #include <QDesktopServices>
+#include <QProgressDialog>
 #include "parametereditor.h"
 #include "startupwizard.h"
 #include "widgets/helpdialog.h"
@@ -94,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mVersion = QString::number(VT_VERSION);
+    mVersion = QString::number(VT_VERSION, 'f', 2);
     mVesc = new VescInterface(this);
     mStatusInfoTime = 0;
     mStatusLabel = new QLabel(this);
@@ -102,8 +103,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mTimer = new QTimer(this);
     mKeyLeft = false;
     mKeyRight = false;
-    mMcConfRead = false;
-    mAppConfRead = false;
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
@@ -121,6 +120,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(paramChangedDouble(QObject*,QString,double)));
     connect(ui->actionAboutQt, SIGNAL(triggered(bool)),
             qApp, SLOT(aboutQt()));
+    connect(mVesc->commands(), SIGNAL(pingCanRx(QVector<int>,bool)),
+            this, SLOT(pingCanRx(QVector<int>,bool)));
 
     ui->dispDuty->setName("Duty");
     ui->dispDuty->setRange(100.0);
@@ -130,15 +131,129 @@ MainWindow::MainWindow(QWidget *parent) :
     // Remove the menu with the option to hide the toolbar
     ui->mainToolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    mVesc->mcConfig()->loadParamsXml("://res/parameters_mcconf.xml");
-    mVesc->appConfig()->loadParamsXml("://res/parameters_appconf.xml");
-    mVesc->infoConfig()->loadParamsXml("://res/info.xml");
+    mVesc->fwConfig()->loadParamsXml("://res/config/fw.xml");
+    Utility::configLoadLatest(mVesc);
+
+    QMenu *fwMenu = new QMenu(this);
+    fwMenu->setTitle("Load Firmware Configs");
+    fwMenu->setIcon(QIcon("://res/icons/Electronics-96.png"));
+    for (auto fw: Utility::configSupportedFws()) {
+        QAction *action = new QAction(fwMenu);
+        action->setText(QString("%1.%2").arg(fw.first).arg(fw.second, 2, 10, QChar('0')));
+        connect(action, &QAction::triggered, [this,fw]() {
+            Utility::configLoad(mVesc, fw.first, fw.second);
+        });
+        fwMenu->addAction(action);
+    }
+    ui->menuTools->addMenu(fwMenu);
+
+    QMenu *backupMenu = new QMenu(this);
+
+    auto reloadBackupMenu = [this, backupMenu]() {
+        backupMenu->clear();
+        backupMenu->setTitle("Load Configuration Backups for UUID");
+        backupMenu->setIcon(QIcon("://res/icons/Open Folder-96.png"));
+        for (auto uuid: mVesc->confListBackups()) {
+            QAction *action = new QAction(backupMenu);
+            action->setIcon(QIcon("://res/icons/Electronics-96.png"));
+            QString txt = uuid;
+            QString name = mVesc->confBackupName(uuid);
+            if (!name.isEmpty()) {
+                txt += " (" + name + ")";
+            }
+            action->setText(txt);
+            connect(action, &QAction::triggered, [this,uuid]() {
+                mVesc->confLoadBackup(uuid);
+            });
+            backupMenu->addAction(action);
+        }
+        ui->menuTools_2->addMenu(backupMenu);
+    };
+
+    reloadBackupMenu();
+    connect(mVesc, &VescInterface::configurationBackupsChanged, reloadBackupMenu);
+
     reloadPages();
 
-    connect(mVesc->mcConfig(), SIGNAL(updated()),
-            this, SLOT(mcconfUpdated()));
-    connect(mVesc->appConfig(), SIGNAL(updated()),
-            this, SLOT(appconfUpdated()));
+    mMcConfRead = false;
+    mAppConfRead = false;
+
+    connect(mVesc->mcConfig(), &ConfigParams::updated, [this]() {
+        mMcConfRead = true;
+    });
+    connect(mVesc->appConfig(), &ConfigParams::updated, [this]() {
+        mAppConfRead = true;
+    });
+
+    auto updateMotortype = [this]() {
+        int type = mVesc->mcConfig()->getParamEnum("motor_type");
+        ui->pageList->item(mPageNameIdList.value("motor_bldc"))->setHidden(type != 0);
+        ui->pageList->item(mPageNameIdList.value("motor_dc"))->setHidden(type != 1);
+        ui->pageList->item(mPageNameIdList.value("motor_foc"))->setHidden(type != 2);
+        ui->pageList->item(mPageNameIdList.value("motor_gpdrive"))->setHidden(type != 3);
+    };
+
+    auto updateAppToUse = [this]() {
+        int type = mVesc->appConfig()->getParamEnum("app_to_use");
+        ui->pageList->item(mPageNameIdList.value("app_ppm"))->setHidden
+                (!(type == 1 || type == 4 || type == 8));
+        ui->pageList->item(mPageNameIdList.value("app_adc"))->setHidden
+                (!(type == 2 || type == 5 || type == 8));
+        ui->pageList->item(mPageNameIdList.value("app_uart"))->setHidden
+                (!(type == 3 || type == 4 || type == 5 || type == 8 || type == 8));
+        ui->pageList->item(mPageNameIdList.value("app_vescremote"))->setHidden
+                (!(type == 0 || type == 3 || type == 6 || type == 7 || type == 8));
+        ui->pageList->item(mPageNameIdList.value("app_balance"))->setHidden
+                (!(type == 8 || type == 9));
+    };
+
+    connect(mVesc, &VescInterface::configurationChanged, [updateMotortype, updateAppToUse, this]() {
+        qDebug() << "Reloading user interface due to configuration change.";
+
+        mMcConfRead = false;
+        mAppConfRead = false;
+
+        mPageMotorSettings->reloadParams();
+        mPageMotor->reloadParams();
+        mPageBldc->reloadParams();
+        mPageDc->reloadParams();
+        mPageFoc->reloadParams();
+        mPageGpd->reloadParams();
+        mPageControllers->reloadParams();
+        mPageMotorInfo->reloadParams();
+        mPageAppSettings->reloadParams();
+        mPageAppGeneral->reloadParams();
+        mPageAppPpm->reloadParams();
+        mPageAppAdc->reloadParams();
+        mPageAppUart->reloadParams();
+        mPageAppNunchuk->reloadParams();
+        mPageAppNrf->reloadParams();
+        mPageAppBalance->reloadParams();
+        mPageAppImu->reloadParams();
+        mPageFirmware->reloadParams();
+        mPageCanAnalyzer->reloadParams();
+
+        updateMotortype();
+        updateAppToUse();
+    });
+
+    connect(mVesc->mcConfig(), &ConfigParams::paramChangedEnum,
+            [updateMotortype](QObject *src, QString name, int newParam) {
+        (void)src;
+        (void)newParam;
+        if (name == "motor_type") {
+            updateMotortype();
+        }
+    });
+
+    connect(mVesc->appConfig(), &ConfigParams::paramChangedEnum,
+            [updateAppToUse](QObject *src, QString name, int newParam) {
+        (void)src;
+        (void)newParam;
+        if (name == "app_to_use") {
+            updateAppToUse();
+        }
+    });
 
     qApp->installEventFilter(this);
     qInstallMessageHandler(myMessageOutput);
@@ -161,6 +276,9 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
+    updateMotortype();
+    updateAppToUse();
+
     mPageDebugPrint->printConsole("VESC® Tool " + mVersion + " started<br>");
 }
 
@@ -181,7 +299,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::eventFilter(QObject *object, QEvent *e)
 {
-    Q_UNUSED(object);
+    (void)object;
 
     if (!mVesc->isPortConnected() || !ui->actionKeyboardControl->isChecked()) {
         return false;
@@ -284,14 +402,46 @@ void MainWindow::timerSlot()
         }
     }
 
+    // Scan can bus on connect
+    if (mVesc->isPortConnected() && ui->canList->count() == 0 && ui->scanCanButton->isEnabled()) {
+        on_scanCanButton_clicked();
+    }
+
+    // If disconnected for a short time clear the can list so it scans on reconnect.
+    // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
+    static int disconected_cnt = 0;
+    disconected_cnt++;
+    if (disconected_cnt >= 20 && ui->canList->count() > 0) {
+        ui->canList->clear();
+        mVesc->commands()->setSendCan(false);
+    }
+
     // CAN fwd
     if (ui->actionCanFwd->isChecked() != mVesc->commands()->getSendCan()) {
         ui->actionCanFwd->setChecked(mVesc->commands()->getSendCan());
     }
 
+    {
+        if (mVesc->commands()->getSendCan()) {
+            int id_set = mVesc->commands()->getCanSendId();
+            for (int i = 1; i <  ui->canList->count(); i++) {
+                int id_ui = ui->canList->item(i)->text().split(" ")[2].toInt();
+                if (id_ui == id_set) {
+                    ui->canList->setCurrentRow(i);
+                    break;
+                }
+            }
+        } else {
+            ui->canList->setCurrentRow(0);
+        }
+    }
+
     // RT data
     if (ui->actionRtData->isChecked()) {
         mVesc->commands()->getValues();
+        if (mVesc->isRtLogOpen()) {
+            mVesc->commands()->getValuesSetup();
+        }
     }
 
     // APP RT data
@@ -299,6 +449,7 @@ void MainWindow::timerSlot()
         mVesc->commands()->getDecodedAdc();
         mVesc->commands()->getDecodedChuk();
         mVesc->commands()->getDecodedPpm();
+        mVesc->commands()->getDecodedBalance();
     }
 
     // IMU Data
@@ -319,21 +470,25 @@ void MainWindow::timerSlot()
     // Read configurations if they haven't been read since starting VESC Tool
     if (mVesc->isPortConnected()) {
         static int conf_cnt = 0;
+        disconected_cnt = 0;
         conf_cnt++;
         if (conf_cnt >= 20) {
             conf_cnt = 0;
-            if (!mMcConfRead) {
-                mVesc->commands()->getMcconf();
-            }
 
-            if (!mAppConfRead) {
-                mVesc->commands()->getAppConf();
+            if (!mVesc->deserializeFailedSinceConnected() && mVesc->fwRx()) {
+                if (!mMcConfRead) {
+                    mVesc->commands()->getMcconf();
+                }
+
+                if (!mAppConfRead) {
+                    mVesc->commands()->getAppConf();
+                }
             }
         }
     }
 
     // Disable all data streaming when uploading firmware
-    if (mVesc->commands()->getFirmwareUploadProgress() > 0.1) {
+    if (mVesc->getFwUploadProgress() > 0.1) {
         ui->actionSendAlive->setChecked(false);
         ui->actionRtData->setChecked(false);
         ui->actionRtDataApp->setChecked(false);
@@ -519,16 +674,6 @@ void MainWindow::paramChangedDouble(QObject *src, QString name, double newParam)
     if (name == "l_current_max") {
         ui->dispCurrent->setRange(fabs(newParam));
     }
-}
-
-void MainWindow::mcconfUpdated()
-{
-    mMcConfRead = true;
-}
-
-void MainWindow::appconfUpdated()
-{
-    mAppConfRead = true;
 }
 
 void MainWindow::mcConfigCheckResult(QStringList paramsNotSet)
@@ -738,7 +883,7 @@ void MainWindow::on_currentButton_clicked()
 
 void MainWindow::on_speedButton_clicked()
 {
-    mVesc->commands()->setRpm(ui->speedBox->value());
+    mVesc->commands()->setRpm(int(ui->speedBox->value()));
     ui->actionSendAlive->setChecked(true);
 }
 
@@ -772,7 +917,7 @@ void MainWindow::addPageItem(QString name, QString icon, QString groupIcon, bool
 
 void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
 {
-    ConfigParams *params = 0;
+    ConfigParams *params = nullptr;
 
     if (conf.toLower() == "mcconf") {
         params = mVesc->mcConfig();
@@ -818,7 +963,7 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
 void MainWindow::showPage(const QString &name)
 {
     for (int i = 0;i < ui->pageList->count();i++) {
-        PageListItem *p = (PageListItem*)(ui->pageList->itemWidget(ui->pageList->item(i)));
+        PageListItem *p = dynamic_cast<PageListItem*>(ui->pageList->itemWidget(ui->pageList->item(i)));
         if (p->name() == name) {
             ui->pageList->setCurrentRow(i);
             break;
@@ -873,24 +1018,28 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageBldc);
     addPageItem(tr("BLDC"), "://res/icons/bldc.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_bldc", ui->pageList->count() - 1);
 
     mPageDc = new PageDc(this);
     mPageDc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageDc);
     addPageItem(tr("DC"), "://res/icons/Car Battery-96.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_dc", ui->pageList->count() - 1);
 
     mPageFoc = new PageFoc(this);
     mPageFoc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageFoc);
     addPageItem(tr("FOC"), "://res/icons/3ph_sine.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_foc", ui->pageList->count() - 1);
 
     mPageGpd = new PageGPD(this);
     mPageGpd->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageGpd);
     addPageItem(tr("GPDrive"), "://res/icons/3ph_sine.png",
                 "://res/icons/mcconf.png", false, true);
+    mPageNameIdList.insert("motor_gpdrive", ui->pageList->count() - 1);
 
     mPageControllers = new PageControllers(this);
     mPageControllers->setVesc(mVesc);
@@ -926,29 +1075,47 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageAppPpm);
     addPageItem(tr("PPM"), "://res/icons/Controller-96.png",
                 "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_ppm", ui->pageList->count() - 1);
 
     mPageAppAdc = new PageAppAdc(this);
     mPageAppAdc->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppAdc);
     addPageItem(tr("ADC"), "://res/icons/Potentiometer-96.png",
                 "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_adc", ui->pageList->count() - 1);
 
     mPageAppUart = new PageAppUart(this);
     mPageAppUart->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppUart);
     addPageItem(tr("UART"), "://res/icons/Rs 232 Male-96.png",
                 "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_uart", ui->pageList->count() - 1);
 
     mPageAppNunchuk = new PageAppNunchuk(this);
     mPageAppNunchuk->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNunchuk);
-    addPageItem(tr("Nunchuk"), "://res/icons/Wii-96.png",
+    addPageItem(tr("VESC Remote"), "://res/icons/icons8-fantasy-96.png",
                 "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_vescremote", ui->pageList->count() - 1);
 
     mPageAppNrf = new PageAppNrf(this);
     mPageAppNrf->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageAppNrf);
     addPageItem(tr("Nrf"), "://res/icons/Online-96.png",
+                "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_nrf", ui->pageList->count() - 1);
+
+    mPageAppBalance = new PageAppBalance(this);
+    mPageAppBalance->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppBalance);
+    addPageItem(tr("Balance"), "://res/icons/EUC-96.png",
+                "://res/icons/appconf.png", false, true);
+    mPageNameIdList.insert("app_balance", ui->pageList->count() - 1);
+
+    mPageAppImu = new PageAppImu(this);
+    mPageAppImu->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageAppImu);
+    addPageItem(tr("IMU"), "://res/icons/Gyroscope-96.png",
                 "://res/icons/appconf.png", false, true);
 
     mPageDataAnalysis = new PageDataAnalysis(this);
@@ -971,6 +1138,11 @@ void MainWindow::reloadPages()
     ui->pageWidget->addWidget(mPageImu);
     addPageItem(tr("IMU Data"), "://res/icons/Line Chart-96.png", "", false, true);
 
+    mPageLogAnalysis = new PageLogAnalysis(this);
+    mPageLogAnalysis->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageLogAnalysis);
+    addPageItem(tr("Log Analysis"), "://res/icons/Waypoint Map-96.png", "", false, true);
+
     mPageTerminal = new PageTerminal(this);
     mPageTerminal->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageTerminal);
@@ -980,6 +1152,11 @@ void MainWindow::reloadPages()
     mPageSwdProg->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageSwdProg);
     addPageItem(tr("SWD Prog"), "://res/icons/Electronics-96.png", "", true);
+
+    mPageCanAnalyzer = new PageCanAnalyzer(this);
+    mPageCanAnalyzer->setVesc(mVesc);
+    ui->pageWidget->addWidget(mPageCanAnalyzer);
+    addPageItem(tr("CAN Analyzer"), "://res/icons/can_off.png", "", true);
 
     mPageDebugPrint = new PageDebugPrint(this);
     ui->pageWidget->addWidget(mPageDebugPrint);
@@ -991,7 +1168,7 @@ void MainWindow::reloadPages()
 
     // Adjust sizes
     QFontMetrics fm(this->font());
-    int width = fm.width("Welcome & Wizards++++++");
+    int width = fm.width("Welcome & Wizards++++++++++");
     int height = fm.height();
 
     for(int i = 0; i < ui->pageList->count(); i++) {
@@ -1001,8 +1178,11 @@ void MainWindow::reloadPages()
 
     ui->pageList->setMinimumWidth(width);
     ui->pageList->setMaximumWidth(width);
+    ui->canList->setMinimumWidth(width);
+    ui->canList->setMaximumWidth(width);
     ui->pageLabel->setMaximumWidth(width);
     ui->pageLabel->setMaximumHeight((394 * width) / 1549);
+    ui->scanCanButton->setMaximumWidth(width);
 
     ui->pageList->setCurrentRow(0);
     ui->pageWidget->setCurrentIndex(0);
@@ -1210,9 +1390,12 @@ void MainWindow::on_actionTerminalPrintThreads_triggered()
     showPage("VESC Terminal");
 }
 
-void MainWindow::on_actionTerminalDRV8301ResetLatchedFaults_triggered()
+void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()
 {
     mVesc->commands()->sendTerminalCmd("drv8301_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv8323s_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv8320_reset_faults");
+    mVesc->commands()->sendTerminalCmd("drv8305_reset_faults");
 }
 
 void MainWindow::on_actionCanFwd_toggled(bool arg1)
@@ -1281,4 +1464,113 @@ void MainWindow::on_actionExportConfigurationParser_triggered()
     }
 
     Utility::createParamParserC(mVesc, path);
+}
+
+void MainWindow::on_actionBackupConfiguration_triggered()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, "Backup name (Optional)",
+                                         "Name (can be blank):", QLineEdit::Normal,
+                                         "", &ok);
+    if (ok) {
+        mVesc->confStoreBackup(false, name);
+    }
+}
+
+void MainWindow::on_actionRestoreConfiguration_triggered()
+{
+    mVesc->confRestoreBackup(false);
+}
+
+void MainWindow::on_actionClearConfigurationBackups_triggered()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::warning(this,
+                                 tr("Warning"),
+                                 tr("This is going to remove all configuration backups for "
+                                    "this instance of VESC Tool. Continue?"),
+                                 QMessageBox::Yes | QMessageBox::Cancel);
+
+    if (reply == QMessageBox::Yes) {
+        mVesc->confClearBackups();
+    }
+}
+
+void MainWindow::on_actionParameterEditorFW_triggered()
+{
+    ParameterEditor *p = new ParameterEditor(this);
+    p->setAttribute(Qt::WA_DeleteOnClose);
+    p->setParams(mVesc->fwConfig());
+    p->show();
+}
+
+void MainWindow::on_actionBackupConfigurationsCAN_triggered()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, "Backup name (Optional)",
+                                         "Name (can be blank):", QLineEdit::Normal,
+                                         "", &ok);
+    if (ok) {
+        QProgressDialog dialog("Backing up configurations...", QString(), 0, 0, this);
+        dialog.setWindowModality(Qt::WindowModal);
+        dialog.show();
+        mVesc->confStoreBackup(true, name);
+    }
+}
+
+void MainWindow::on_actionRestoreConfigurationsCAN_triggered()
+{
+    QProgressDialog dialog("Restoring configurations...", QString(), 0, 0, this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.show();
+    mVesc->confRestoreBackup(true);
+}
+
+void MainWindow::on_scanCanButton_clicked()
+{
+    if (mVesc->isPortConnected()) {
+        ui->scanCanButton->setEnabled(false);
+        mVesc->commands()->pingCan();
+    } else {
+        ui->canList->clear();
+        showStatusInfo("Connect to VESC before scanning", false);
+    }
+}
+
+void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
+{
+    (void)isTimeout;
+    ui->scanCanButton->setEnabled(true);
+
+    ui->canList->clear();
+    QListWidgetItem *item = new QListWidgetItem(QString("MOTOR ID: LOCAL"));
+    ui->canList->addItem(item);
+    for (int dev: devs) {
+        item = new QListWidgetItem(QString("MOTOR ID: %1").arg(dev));
+        ui->canList->addItem(item);
+    }
+    ui->canList->setCurrentRow(0);
+}
+
+void MainWindow::on_canList_currentRowChanged(int currentRow)
+{
+    if (currentRow >= 0) {
+        if (currentRow == 0) {
+            if (mVesc->commands()->getSendCan()) {
+                mVesc->commands()->setSendCan(false);
+                mVesc->commands()->getMcconf();
+                mVesc->commands()->getAppConf();
+            }
+        } else {
+            int id = ui->canList->currentItem()->text().split(" ")[2].toInt();
+            if (id >= 0 && id < 255) {
+                if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
+                    mVesc->commands()->setCanSendId(quint32(id));
+                    mVesc->commands()->setSendCan(true);
+                    mVesc->commands()->getMcconf();
+                    mVesc->commands()->getAppConf();
+                }
+            }
+        }
+    }
 }

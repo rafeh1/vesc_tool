@@ -31,7 +31,7 @@ class Commands : public QObject
 {
     Q_OBJECT
 public:
-    explicit Commands(QObject *parent = 0);
+    explicit Commands(QObject *parent = nullptr);
 
     void setLimitedMode(bool is_limited);
     Q_INVOKABLE bool isLimitedMode();
@@ -41,10 +41,6 @@ public:
     Q_INVOKABLE int getCanSendId();
     void setMcConfig(ConfigParams *mcConfig);
     void setAppConfig(ConfigParams *appConfig);
-    Q_INVOKABLE void startFirmwareUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false);
-    Q_INVOKABLE double getFirmwareUploadProgress();
-    Q_INVOKABLE QString getFirmwareUploadStatus();
-    Q_INVOKABLE void cancelFirmwareUpload();
     void checkMcConfig();
     Q_INVOKABLE void emitEmptyValues();
     Q_INVOKABLE void emitEmptySetupValues();
@@ -52,10 +48,22 @@ public:
     Q_INVOKABLE bool getLimitedSupportsFwdAllCan() const;
     void setLimitedSupportsFwdAllCan(bool limitedSupportsFwdAllCan);
 
+    Q_INVOKABLE bool getLimitedSupportsEraseBootloader() const;
+    void setLimitedSupportsEraseBootloader(bool limitedSupportsEraseBootloader);
+
+    Q_INVOKABLE QVector<int> getLimitedCompatibilityCommands() const;
+    void setLimitedCompatibilityCommands(QVector<int> compatibilityCommands);
+
+    Q_INVOKABLE static QString faultToStr(mc_fault_code fault);
+
 signals:
     void dataToSend(QByteArray &data);
 
-    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired);
+    void fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                           bool isPaired, int isTestFw);
+    void eraseNewAppResReceived(bool ok);
+    void eraseBootloaderResReceived(bool ok);
+    void writeNewAppDataResReceived(bool ok, bool hasOffset, quint32 offset);
     void ackReceived(QString ackType);
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void printReceived(QString str);
@@ -66,6 +74,7 @@ signals:
     void decodedPpmReceived(double value, double last_len);
     void decodedAdcReceived(double value, double voltage, double value2, double voltage2);
     void decodedChukReceived(double value);
+    void decodedBalanceReceived(BALANCE_VALUES values);
     void motorRLReceived(double r, double l);
     void motorLinkageReceived(double flux_linkage);
     void encoderParamReceived(double offset, double ratio, bool inverted);
@@ -79,15 +88,30 @@ signals:
     void detectAllFocReceived(int result);
     void pingCanRx(QVector<int> devs, bool isTimeout);
     void valuesImuReceived(IMU_VALUES values, unsigned int mask);
+    void imuCalibrationReceived(QVector<double> cal);
     void bmConnRes(int res);
     void bmEraseFlashAllRes(int res);
     void bmWriteFlashRes(int res);
     void bmRebootRes(int res);
+    void bmMapPinsDefaultRes(bool ok);
+    void bmMapPinsNrf5xRes(bool ok);
+    void plotInitReceived(QString xLabel, QString yLabel);
+    void plotDataReceived(double x, double y);
+    void plotAddGraphReceived(QString name);
+    void plotSetGraphReceived(int graph);
+    void bmReadMemRes(int res, QByteArray data);
+    void deserializeConfigFailed(bool isMc, bool isApp);
+    void canFrameRx(QByteArray data, quint32 id, bool isExtended);
 
 public slots:
     void processPacket(QByteArray data);
 
     void getFwVersion();
+    void eraseNewApp(bool fwdCan, quint32 fwSize);
+    void eraseBootloader(bool fwdCan);
+    void writeNewAppData(QByteArray data, quint32 offset, bool fwdCan);
+    void writeNewAppDataLzo(QByteArray data, quint32 offset, quint16 decompressedLen, bool fwdCan);
+    void jumpToBootloader(bool fwdCan);
     void getValues();
     void sendTerminalCmd(QString cmd);
     void sendTerminalCmdSync(QString cmd);
@@ -111,6 +135,7 @@ public slots:
     void getDecodedPpm();
     void getDecodedAdc();
     void getDecodedChuk();
+    void getDecodedBalance();
     void setServoPos(double pos);
     void measureRL();
     void measureLinkage(double current, double min_rpm, double low_duty, double resistance);
@@ -133,42 +158,40 @@ public slots:
                        bool forward_can, bool divide_by_controllers, bool ack);
     void getValuesSelective(unsigned int mask);
     void getValuesSetupSelective(unsigned int mask);
-    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty, double resistance);
+    void measureLinkageOpenloop(double current, double erpm_per_sec, double low_duty,
+                                double resistance, double inductanec);
     void detectAllFoc(bool detect_can, double max_power_loss, double min_current_in,
                       double max_current_in, double openloop_rpm, double sl_erpm);
     void pingCan();
     void disableAppOutput(int time_ms, bool fwdCan);
     void getImuData(unsigned int mask);
+    void getImuCalibration(double yaw);
     void bmConnect();
     void bmEraseFlashAll();
     void bmWriteFlash(uint32_t addr, QByteArray data);
+    void bmWriteFlashLzo(uint32_t addr, quint16 decompressedLen, QByteArray data);
     void bmReboot();
     void bmDisconnect();
+    void bmMapPinsDefault();
+    void bmMapPinsNrf5x();
+    void bmReadMem(uint32_t addr, quint16 size);
+    void setCurrentRel(double current);
+    void forwardCanFrame(QByteArray data, quint32 id, bool isExtended);
+    void setBatteryCut(double start, double end, bool store, bool fwdCan);
 
 private slots:
     void timerSlot();
 
 private:
     void emitData(QByteArray data);
-    void firmwareUploadUpdate(bool isTimeout);
-    QString faultToStr(mc_fault_code fault);
 
     QTimer *mTimer;
     bool mSendCan;
     int mCanId;
     bool mIsLimitedMode;
     bool mLimitedSupportsFwdAllCan;
-
-    // FW upload state
-    QByteArray mNewFirmware;
-    bool mFirmwareIsUploading;
-    int mFirmwareState;
-    int mFimwarePtr;
-    int mFirmwareTimer;
-    int mFirmwareRetries;
-    bool mFirmwareIsBootloader;
-    bool mFirmwareFwdAllCan;
-    QString mFirmwareUploadStatus;
+    bool mLimitedSupportsEraseBootloader;
+    QVector<int> mCompatibilityCommands; // int to be QML-compatible
 
     ConfigParams *mMcConfig;
     ConfigParams *mAppConfig;
@@ -185,6 +208,7 @@ private:
     int mTimeoutDecPpm;
     int mTimeoutDecAdc;
     int mTimeoutDecChuk;
+    int mTimeoutDecBalance;
     int mTimeoutPingCan;
 
 };

@@ -33,7 +33,7 @@ class PageSwdProg : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageSwdProg(QWidget *parent = 0);
+    explicit PageSwdProg(QWidget *parent = nullptr);
     ~PageSwdProg();
 
     VescInterface *vesc() const;
@@ -63,6 +63,7 @@ private slots:
     void on_disconnectButton_clicked();
     void on_cancelButton_clicked();
     void on_eraseFlashButton_clicked();
+    void on_connectNrf5xButton_clicked();
 
 private:
     Ui::PageSwdProg *ui;

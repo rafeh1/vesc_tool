@@ -37,7 +37,6 @@ Item {
         title: "VESC Tool Settings"
 
         width: parent.width - 20
-        height: column.height - 40
         closePolicy: Popup.CloseOnEscape
 
         x: 10
@@ -61,6 +60,13 @@ Item {
                 checked: VescIf.keepScreenOn()
             }
 
+            CheckBox {
+                id: wakeLockBox
+                Layout.fillWidth: true
+                text: "Use Wake Lock (experimental)"
+                checked: VescIf.useWakeLock()
+            }
+
             Item {
                 // Spacer
                 Layout.fillWidth: true
@@ -71,8 +77,14 @@ Item {
         onClosed: {
             VescIf.setUseImperialUnits(imperialBox.checked)
             VescIf.setKeepScreenOn(screenOnBox.checked)
+            VescIf.setUseWakeLock(wakeLockBox.checked)
             VescIf.storeSettings()
+
             Utility.keepScreenOn(VescIf.keepScreenOn())
+
+            if (VescIf.useWakeLock()) {
+                VescIf.setWakeLock(VescIf.isPortConnected())
+            }
         }
     }
 }

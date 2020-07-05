@@ -423,7 +423,7 @@ Item {
                         enabled: false
 
                         onClicked: {
-                            mCommands.cancelFirmwareUpload()
+                            VescIf.fwUploadCancel()
                         }
                     }
                 }
@@ -545,11 +545,21 @@ Item {
 
             if (hwItems.rowCount() === 1) {
                 uploadDialog.title = "Warning"
-                uploadDialogLabel.text =
-                        msg + "\n\n" +
-                        "Uploading new firmware will clear all settings on your VESC " +
-                        "and you have to do the configuration again. Do you want to " +
-                        "continue?"
+
+                if (VescIf.getFwSupportsConfiguration()) {
+                    msg += "\n\n" +
+                            "Uploading new firmware will clear all settings on your VESC. You can make " +
+                            "a backup of the settings from the connection page and restore them after the " +
+                            "update if you'd like (if you haven't done the backup already). " +
+                            "Do you want to continue with the update, or cancel and do the backup first?"
+                } else {
+                    msg += "\n\n" +
+                            "Uploading new firmware will clear all settings on your VESC " +
+                            "and you have to do the configuration again. Do you want to " +
+                            "continue?"
+                }
+
+                uploadDialogLabel.text = msg
                 uploadDialog.open()
             } else {
                 uploadDialog.title = "Warning"
@@ -586,11 +596,16 @@ Item {
             }
 
             uploadDialog.title = "Warning"
+
+            var msgBl2 = ""
+            if (!mCommands.getLimitedSupportsEraseBootloader()) {
+                msgBl2 = "If the VESC already has a bootloader this will destroy " +
+                        "the bootloader and firmware updates cannot be done anymore. "
+            }
+
             uploadDialogLabel.text =
-                    msgBl + "\n\n" +
-                    "If the VESC already has a bootloader this will destroy " +
-                    "the bootloader and firmware updates cannot be done anymore. Do " +
-                    "you want to continue?"
+                    msgBl + "\n\n" + msgBl2 +
+                    "Do you want to continue?"
             uploadDialog.open()
         }
     }
@@ -602,7 +617,7 @@ Item {
 
         onTriggered: {
             uploadAllButton.enabled = mCommands.getLimitedSupportsFwdAllCan() &&
-                    !mCommands.getSendCan() && mCommands.getFirmwareUploadProgress() < 0
+                    !mCommands.getSendCan() && VescIf.getFwUploadProgress() < 0
 
             if (!VescIf.isPortConnected()) {
                 versionText.text =
@@ -636,8 +651,14 @@ Item {
             updateHw(hw)
             updateBl(hw)
 
+            var testFwStr = "";
+
+            if (isTestFw > 0) {
+                testFwStr = " BETA " +  isTestFw
+            }
+
             versionText.text =
-                    "FW   : " + major + "." + minor + "\n" +
+                    "FW   : " + major + "." + minor + testFwStr + "\n" +
                     "HW   : " + hw + "\n" +
                     "UUID : " + Utility.uuid2Str(uuid, false)
         }

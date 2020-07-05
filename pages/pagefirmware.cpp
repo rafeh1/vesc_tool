@@ -32,7 +32,7 @@ PageFirmware::PageFirmware(QWidget *parent) :
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
     ui->cancelButton->setEnabled(false);
-    mVesc = 0;
+    mVesc = nullptr;
 
     updateHwList();
     updateBlList();
@@ -69,8 +69,20 @@ void PageFirmware::setVesc(VescInterface *vesc)
     mVesc = vesc;
 
     if (mVesc) {
-        ui->display->setText(mVesc->commands()->getFirmwareUploadStatus());
+        ui->display->setText(mVesc->getFwUploadStatus());
 
+        reloadParams();
+
+        connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
+                this, SLOT(fwUploadStatus(QString,double,bool)));
+        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool,int)),
+                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool,int)));
+    }
+}
+
+void PageFirmware::reloadParams()
+{
+    if (mVesc) {
         QStringList fws = mVesc->getSupportedFirmwares();
         QString str;
         for (int i = 0;i < fws.size();i++) {
@@ -80,19 +92,16 @@ void PageFirmware::setVesc(VescInterface *vesc)
             }
         }
         ui->supportedLabel->setText(str);
-
-        connect(mVesc, SIGNAL(fwUploadStatus(QString,double,bool)),
-                this, SLOT(fwUploadStatus(QString,double,bool)));
-        connect(mVesc->commands(), SIGNAL(fwVersionReceived(int,int,QString,QByteArray,bool)),
-                this, SLOT(fwVersionReceived(int,int,QString,QByteArray,bool)));
     }
 }
 
 void PageFirmware::timerSlot()
 {
     if (mVesc) {
-        ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
-                                        !mVesc->commands()->getSendCan());
+        if (mVesc->getFwUploadProgress() >= 0.0) {
+            ui->uploadAllButton->setEnabled(mVesc->commands()->getLimitedSupportsFwdAllCan() &&
+                                            !mVesc->commands()->getSendCan() && mVesc->getFwUploadProgress() < 0.0);
+        }
 
         if (!mVesc->isPortConnected()) {
             ui->currentLabel->clear();
@@ -112,10 +121,12 @@ void PageFirmware::fwUploadStatus(const QString &status, double progress, bool i
 
     ui->display->setValue(progress * 100.0);
     ui->uploadButton->setEnabled(!isOngoing);
+    ui->uploadAllButton->setEnabled(!isOngoing);
     ui->cancelButton->setEnabled(isOngoing);
 }
 
-void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid, bool isPaired)
+void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArray uuid,
+                                     bool isPaired, int isTestFw)
 {
     QString fwStr;
     QString strUuid = Utility::uuid2Str(uuid, true);
@@ -135,7 +146,13 @@ void PageFirmware::fwVersionReceived(int major, int minor, QString hw, QByteArra
         }
     }
 
-    fwStr += "\n" + QString("Paired: %1").arg(isPaired ? "true" : "false");
+    fwStr += "\n" + QString("Paired: %1, Status: ").
+            arg(isPaired ? "true" : "false");
+    if (isTestFw > 0) {
+        fwStr += QString("BETA %1").arg(isTestFw);
+    } else {
+        fwStr += "STABLE";
+    }
 
     ui->currentLabel->setText(fwStr);
     updateHwList(hw);
@@ -177,7 +194,7 @@ void PageFirmware::updateFwList()
 {
     ui->fwList->clear();
     QListWidgetItem *item = ui->hwList->currentItem();
-    if (item != 0) {
+    if (item != nullptr) {
         QString hw = item->data(Qt::UserRole).toString();
 
         QDirIterator it(hw);
@@ -264,7 +281,7 @@ void PageFirmware::on_readVersionButton_clicked()
 void PageFirmware::on_cancelButton_clicked()
 {
     if (mVesc) {
-        mVesc->commands()->cancelFirmwareUpload();
+        mVesc->fwUploadCancel();
     }
 }
 
@@ -314,7 +331,8 @@ void PageFirmware::uploadFw(bool allOverCan)
             file.setFileName(ui->fwEdit->text());
 
             QFileInfo fileInfo(file.fileName());
-            if (!(fileInfo.fileName().startsWith("BLDC_4") || fileInfo.fileName().startsWith("VESC"))
+            if (!(fileInfo.fileName().toLower().startsWith("bldc_4") ||
+                  fileInfo.fileName().toLower().startsWith("vesc"))
                     || !fileInfo.fileName().endsWith(".bin")) {
                 QMessageBox::critical(this,
                                       tr("Upload Error"),
@@ -374,13 +392,21 @@ void PageFirmware::uploadFw(bool allOverCan)
                                             "chosen the correct hardware version?"),
                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         } else if (ui->fwTabWidget->currentIndex() == 2) {
-            reply = QMessageBox::warning(this,
-                                         tr("Warning"),
-                                         tr("This will attempt to upload a bootloader to the connected VESC. "
-                                            "If the connected VESC already has a bootloader this will destroy "
-                                            "the bootloader and firmware updates cannot be done anymore. Do "
-                                            "you want to continue?"),
-                                         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (mVesc->commands()->getLimitedSupportsEraseBootloader()) {
+                reply = QMessageBox::warning(this,
+                                             tr("Warning"),
+                                             tr("This will attempt to upload a bootloader to the connected VESC. "
+                                                "Do you want to continue?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            } else {
+                reply = QMessageBox::warning(this,
+                                             tr("Warning"),
+                                             tr("This will attempt to upload a bootloader to the connected VESC. "
+                                                "If the connected VESC already has a bootloader this will destroy "
+                                                "the bootloader and firmware updates cannot be done anymore. Do "
+                                                "you want to continue?"),
+                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            }
             isBootloader = true;
         } else {
             reply = QMessageBox::No;
@@ -388,13 +414,15 @@ void PageFirmware::uploadFw(bool allOverCan)
 
         if (reply == QMessageBox::Yes) {
             QByteArray data = file.readAll();
-            mVesc->commands()->startFirmwareUpload(data, isBootloader, allOverCan);
+            bool fwRes = mVesc->fwUpload(data, isBootloader, allOverCan);
 
-            QMessageBox::warning(this,
-                                 tr("Warning"),
-                                 tr("The firmware upload is now ongoing. After the upload has finished you must wait at least "
-                                    "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
-                                    "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+            if (!isBootloader && fwRes) {
+                QMessageBox::warning(this,
+                                     tr("Warning"),
+                                     tr("The firmware upload is done. You must wait at least "
+                                        "10 seconds before unplugging power. Otherwise the firmware will get corrupted and your "
+                                        "VESC will become bricked. If that happens you need a SWD programmer to recover it."));
+            }
         }
     }
 }

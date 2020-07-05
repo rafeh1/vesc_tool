@@ -25,6 +25,7 @@
 #include <QTimer>
 #include <QProcess>
 #include <QSettings>
+#include <QMap>
 #include "vescinterface.h"
 #include "widgets/pagelistitem.h"
 
@@ -50,11 +51,15 @@
 #include "pages/pageappuart.h"
 #include "pages/pageappnunchuk.h"
 #include "pages/pageappnrf.h"
+#include "pages/pageappbalance.h"
 #include "pages/pagesettings.h"
 #include "pages/pagegpd.h"
 #include "pages/pageexperiments.h"
 #include "pages/pageimu.h"
 #include "pages/pageswdprog.h"
+#include "pages/pageappimu.h"
+#include "pages/pageloganalysis.h"
+#include "pages/pagecananalyzer.h"
 
 namespace Ui {
 class MainWindow;
@@ -65,7 +70,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     bool eventFilter(QObject *object, QEvent *e);
 
@@ -76,9 +81,8 @@ private slots:
     void serialPortNotWritable(const QString &port);
     void valuesReceived(MC_VALUES values, unsigned int mask);
     void paramChangedDouble(QObject *src, QString name, double newParam);
-    void mcconfUpdated();
-    void appconfUpdated();
     void mcConfigCheckResult(QStringList paramsNotSet);
+    void pingCanRx(QVector<int> devs, bool isTimeout);
 
     void on_actionReconnect_triggered();
     void on_actionDisconnect_triggered();
@@ -116,7 +120,7 @@ private slots:
     void on_actionTerminalShowHelp_triggered();
     void on_actionTerminalClear_triggered();
     void on_actionTerminalPrintThreads_triggered();
-    void on_actionTerminalDRV8301ResetLatchedFaults_triggered();
+    void on_actionTerminalDRVResetLatchedFaults_triggered();
     void on_actionCanFwd_toggled(bool arg1);
     void on_actionSafetyInformation_triggered();
     void on_actionWarrantyStatement_triggered();
@@ -127,6 +131,14 @@ private slots:
     void on_posBox_editingFinished();
     void on_posBox_valueChanged(double arg1);
     void on_actionExportConfigurationParser_triggered();
+    void on_actionBackupConfiguration_triggered();
+    void on_actionRestoreConfiguration_triggered();
+    void on_actionClearConfigurationBackups_triggered();
+    void on_actionParameterEditorFW_triggered();
+    void on_actionBackupConfigurationsCAN_triggered();
+    void on_actionRestoreConfigurationsCAN_triggered();
+    void on_scanCanButton_clicked();
+    void on_canList_currentRowChanged(int currentRow);
 
 private:
     Ui::MainWindow *ui;
@@ -141,6 +153,7 @@ private:
     bool mKeyRight;
     bool mMcConfRead;
     bool mAppConfRead;
+    QMap<QString, int> mPageNameIdList;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;
@@ -167,8 +180,12 @@ private:
     PageAppUart *mPageAppUart;
     PageAppNunchuk *mPageAppNunchuk;
     PageAppNrf *mPageAppNrf;
+    PageAppBalance *mPageAppBalance;
     PageSettings *mPageSettings;
     PageSwdProg *mPageSwdProg;
+    PageAppImu *mPageAppImu;
+    PageLogAnalysis *mPageLogAnalysis;
+    PageCanAnalyzer *mPageCanAnalyzer;
 
     void addPageItem(QString name,
                      QString icon = "",

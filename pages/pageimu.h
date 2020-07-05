@@ -24,6 +24,7 @@
 #include <QVector>
 #include <QTimer>
 #include "vescinterface.h"
+#include "widgets/vesc3dview.h"
 
 namespace Ui {
 class PageImu;
@@ -34,11 +35,12 @@ class PageImu : public QWidget
     Q_OBJECT
 
 public:
-    explicit PageImu(QWidget *parent = 0);
+    explicit PageImu(QWidget *parent = nullptr);
     ~PageImu();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
+
 
 private slots:
     void timerSlot();
@@ -72,6 +74,7 @@ private:
 
     double mSecondCounter;
     qint64 mLastUpdateTime;
+    Vesc3DView *m3dView;
 
     void appendDoubleAndTrunc(QVector<double> *vec, double num, int maxSize);
 };

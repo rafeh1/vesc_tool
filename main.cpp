@@ -1,5 +1,5 @@
 /*
-    Copyright 2016 - 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2016 - 2019 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-#if USE_MOBILE
+#ifdef USE_MOBILE
 #ifndef DEBUG_BUILD
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
@@ -101,7 +101,13 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-BoldOblique.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/DejaVuSansMono-Oblique.ttf");
 
-    qApp->setFont(QFont("DejaVu Sans", 11));
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
+
+    qApp->setFont(QFont("Roboto",12));
 
     // Style
     a.setStyleSheet("");
@@ -110,6 +116,16 @@ int main(int argc, char *argv[])
 #ifdef USE_MOBILE
     QmlUi q;
     q.startQmlUi();
+
+    // As background running is allowed, make sure to not update the GUI when
+    // running in the background.
+    QObject::connect(&a, &QApplication::applicationStateChanged, [&q](Qt::ApplicationState state) {
+        if(state == Qt::ApplicationHidden) {
+            q.setVisible(false);
+        } else {
+            q.setVisible(true);
+        }
+    });
 #else
     MainWindow w;
     w.show();

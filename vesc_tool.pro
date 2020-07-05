@@ -5,38 +5,59 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 1.16
+VT_VERSION = 2.06
 VT_INTRO_VERSION = 1
+VT_IS_TEST_VERSION = 0
 
-VT_ANDROID_VERSION_ARMV7 = 22
-VT_ANDROID_VERSION_ARM64 = 23
-VT_ANDROID_VERSION_X86 = 24
+VT_ANDROID_VERSION_ARMV7 = 86
+VT_ANDROID_VERSION_ARM64 = 87
+VT_ANDROID_VERSION_X86 = 88
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
-# Ubuntu 18.04
-# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev
+# Ubuntu 18.04 (should work on raspbian buster too)
+# sudo apt install qml-module-qt-labs-folderlistmodel qml-module-qtquick-extras qml-module-qtquick-controls2 qt5-default libqt5quickcontrols2-5 qtquickcontrols2-5-dev qtcreator qtcreator-doc libqt5serialport5-dev build-essential qml-module-qt3d qt3d5-dev qtdeclarative5-dev qtconnectivity5-dev qtmultimedia5-dev
 
 DEFINES += VT_VERSION=$$VT_VERSION
 DEFINES += VT_INTRO_VERSION=$$VT_INTRO_VERSION
+!vt_test_version: {
+    DEFINES += VT_IS_TEST_VERSION=$$VT_IS_TEST_VERSION
+}
+vt_test_version: {
+    DEFINES += VT_IS_TEST_VERSION=1
+}
 
 CONFIG += c++11
 
 # Build mobile GUI
 #CONFIG += build_mobile
 
+# Debug build (e.g. F5 to reload QML files)
+#DEFINES += DEBUG_BUILD
+
+# If BLE disconnects on ubuntu after about 90 seconds the reason is most likely that the connection interval is incompatible. This can be fixed with:
+# sudo bash -c 'echo 6 > /sys/kernel/debug/bluetooth/hci0/conn_min_interval'
+
+# Clear old bluetooth devices
+# sudo rm -rf /var/lib/bluetooth/*
+# sudo service bluetooth restart
+
 # Bluetooth available
 DEFINES += HAS_BLUETOOTH
 
 # CAN bus available
+# Adding serialbus to Qt seems to break the serial port on static builds. TODO: Figure out why.
 #DEFINES += HAS_CANBUS
 
-# Debug build (e.g. F5 to reload QML files)
-#DEFINES += DEBUG_BUILD
+# Positioning
+DEFINES += HAS_POS
 
 !android: {
     # Serial port available
     DEFINES += HAS_SERIALPORT
+}
+win32: {
+    DEFINES += _USE_MATH_DEFINES
 }
 
 # Options
@@ -64,6 +85,10 @@ contains(DEFINES, HAS_CANBUS) {
 
 contains(DEFINES, HAS_BLUETOOTH) {
     QT       += bluetooth
+}
+
+contains(DEFINES, HAS_POS) {
+    QT       += positioning
 }
 
 android: QT += androidextras
@@ -147,7 +172,8 @@ SOURCES += main.cpp\
     setupwizardapp.cpp \
     setupwizardmotor.cpp \
     startupwizard.cpp \
-    utility.cpp
+    utility.cpp \
+    tcpserversimple.cpp
 
 HEADERS  += mainwindow.h \
     packet.h \
@@ -162,7 +188,8 @@ HEADERS  += mainwindow.h \
     setupwizardapp.h \
     setupwizardmotor.h \
     startupwizard.h \
-    utility.h
+    utility.h \
+    tcpserversimple.h
 
 FORMS    += mainwindow.ui \
     parametereditor.ui
@@ -175,8 +202,11 @@ contains(DEFINES, HAS_BLUETOOTH) {
 include(pages/pages.pri)
 include(widgets/widgets.pri)
 include(mobile/mobile.pri)
+include(map/map.pri)
+include(lzokay/lzokay.pri)
 
 RESOURCES += res.qrc
+RESOURCES += res_config.qrc
 
 build_original {
     RESOURCES += res_original.qrc \
@@ -214,6 +244,8 @@ DISTFILES += \
     android/gradlew \
     android/res/values/libs.xml \
     android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.properties
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/src/com/vedder/vesc/VForegroundService.java \
+    android/src/com/vedder/vesc/Utils.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android

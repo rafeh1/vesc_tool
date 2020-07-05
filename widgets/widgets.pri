@@ -10,6 +10,7 @@ FORMS += \
     $$PWD/detectfoc.ui \
     $$PWD/detectfocencoder.ui \
     $$PWD/detectfochall.ui \
+    $$PWD/detectimu.ui \
     $$PWD/ppmmap.ui \
     $$PWD/adcmap.ui \
     $$PWD/nrfpair.ui \
@@ -36,6 +37,7 @@ HEADERS += \
     $$PWD/detectfoc.h \
     $$PWD/detectfocencoder.h \
     $$PWD/detectfochall.h \
+    $$PWD/detectimu.h \
     $$PWD/ppmmap.h \
     $$PWD/adcmap.h \
     $$PWD/rtdatatext.h \
@@ -47,7 +49,9 @@ HEADERS += \
     $$PWD/aspectimglabel.h \
     $$PWD/historylineedit.h \
     $$PWD/detectallfocdialog.h \
-    $$PWD/dirsetup.h
+    $$PWD/dirsetup.h \
+    $$PWD/vesc3dview.h \
+    $$PWD/superslider.h
 
 SOURCES += \
     $$PWD/parameditbool.cpp \
@@ -67,6 +71,7 @@ SOURCES += \
     $$PWD/detectfoc.cpp \
     $$PWD/detectfocencoder.cpp \
     $$PWD/detectfochall.cpp \
+    $$PWD/detectimu.cpp \
     $$PWD/ppmmap.cpp \
     $$PWD/adcmap.cpp \
     $$PWD/rtdatatext.cpp \
@@ -78,5 +83,7 @@ SOURCES += \
     $$PWD/aspectimglabel.cpp \
     $$PWD/historylineedit.cpp \
     $$PWD/detectallfocdialog.cpp \
-    $$PWD/dirsetup.cpp
+    $$PWD/dirsetup.cpp \
+    $$PWD/vesc3dview.cpp \
+    $$PWD/superslider.cpp
 

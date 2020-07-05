@@ -1,4 +1,6 @@
 FORMS += \
+    $$PWD/pageappbalance.ui \
+    $$PWD/pagecananalyzer.ui \
     $$PWD/pageconnection.ui \
     $$PWD/pagemotor.ui \
     $$PWD/pagedebugprint.ui \
@@ -26,9 +28,13 @@ FORMS += \
     $$PWD/pagegpd.ui \
     $$PWD/pageexperiments.ui \
     $$PWD/pageimu.ui \
-    $$PWD/pageswdprog.ui
+    $$PWD/pageswdprog.ui \
+    $$PWD/pageappimu.ui \
+    $$PWD/pageloganalysis.ui
 
 HEADERS += \
+    $$PWD/pageappbalance.h \
+    $$PWD/pagecananalyzer.h \
     $$PWD/pageconnection.h \
     $$PWD/pagemotor.h \
     $$PWD/pagedebugprint.h \
@@ -56,9 +62,13 @@ HEADERS += \
     $$PWD/pagegpd.h \
     $$PWD/pageexperiments.h \
     $$PWD/pageimu.h \
-    $$PWD/pageswdprog.h
+    $$PWD/pageswdprog.h \
+    $$PWD/pageappimu.h \
+    $$PWD/pageloganalysis.h
 
 SOURCES += \
+    $$PWD/pageappbalance.cpp \
+    $$PWD/pagecananalyzer.cpp \
     $$PWD/pageconnection.cpp \
     $$PWD/pagemotor.cpp \
     $$PWD/pagedebugprint.cpp \
@@ -86,4 +96,6 @@ SOURCES += \
     $$PWD/pagegpd.cpp \
     $$PWD/pageexperiments.cpp \
     $$PWD/pageimu.cpp \
-    $$PWD/pageswdprog.cpp
+    $$PWD/pageswdprog.cpp \
+    $$PWD/pageappimu.cpp \
+    $$PWD/pageloganalysis.cpp

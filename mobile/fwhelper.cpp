@@ -101,7 +101,8 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
     QFileInfo fileInfo(filename);
 
     if (checkName) {
-        if (!(fileInfo.fileName().startsWith("BLDC_4") || fileInfo.fileName().startsWith("VESC"))
+        if (!(fileInfo.fileName().toLower().startsWith("bldc_4") ||
+              fileInfo.fileName().toLower().startsWith("vesc"))
                 || !fileInfo.fileName().endsWith(".bin")) {
             vesc->emitMessageDialog(
                         tr("Upload Error"),
@@ -127,7 +128,7 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
     }
 
     QByteArray data = file.readAll();
-    vesc->commands()->startFirmwareUpload(data, isBootloader, fwdCan);
+    vesc->fwUpload(data, isBootloader, fwdCan);
 
     return true;
 }

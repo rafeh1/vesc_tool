@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     packet.cpp \
     vescinterface.cpp \
     vbytearray.cpp \
-    utility.cpp
+    utility.cpp \
+    tcpserversimple.cpp
 
 HEADERS  += commands.h \
     configparam.h \
@@ -44,7 +45,8 @@ HEADERS  += commands.h \
     packet.h \
     vescinterface.h \
     vbytearray.h \
-    utility.h
+    utility.h \
+    tcpserversimple.h
     
 contains(DEFINES, HAS_BLUETOOTH) {
     SOURCES += bleuart.cpp
@@ -52,8 +54,9 @@ contains(DEFINES, HAS_BLUETOOTH) {
 }
 
 include(widgets/widgets.pri)
+include(lzokay/lzokay.pri)
 
 RESOURCES += \
-    res.qrc \
-    qml.qrc
+    qml.qrc \
+    res_config.qrc
 

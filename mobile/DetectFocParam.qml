@@ -83,7 +83,14 @@ Item {
             return;
         }
 
-        gain = 0.001 / (lambda * lambda)
+        if (res < 1e-10) {
+            VescIf.emitMessageDialog("Calculate Error",
+                                     "R is 0. Please measure it first.",
+                                     false, false)
+            return;
+        }
+
+        gain = 1.0e-3 / (lambda * lambda)
 
         updateDisplay()
     }
@@ -334,7 +341,8 @@ Item {
         }
 
         onAccepted: {
-            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue, dutyBox.realValue, res)
+            mCommands.measureLinkageOpenloop(currentBox.realValue, erpmBox.realValue,
+                                             dutyBox.realValue, res, ind)
         }
     }
 

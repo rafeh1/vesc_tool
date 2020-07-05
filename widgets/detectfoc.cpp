@@ -28,7 +28,7 @@ DetectFoc::DetectFoc(QWidget *parent) :
 {
     ui->setupUi(this);
     layout()->setContentsMargins(0, 0, 0, 0);
-    mVesc = 0;
+    mVesc = nullptr;
     mLastCalcOk = false;
     mAllValuesOk = false;
     mLastOkValuesApplied = false;
@@ -91,7 +91,8 @@ void DetectFoc::on_lambdaButton_clicked()
             mVesc->commands()->measureLinkageOpenloop(ui->currentBox->value(),
                                                       ui->erpmBox->value(),
                                                       ui->dutyBox->value(),
-                                                      ui->resistanceBox->value() / 1e3);
+                                                      ui->resistanceBox->value() / 1e3,
+                                                      ui->inductanceBox->value() / 1e6);
 
             mRunning = true;
         }
@@ -332,7 +333,7 @@ void DetectFoc::on_calcGainButton_clicked()
         return;
     }
 
-    ui->obsGainBox->setValue(0.001 / (lambda * lambda));
+    ui->obsGainBox->setValue(1.0e-3 / (lambda * lambda));
 
     mLastOkValuesApplied = false;
     mLastCalcOk = true;
@@ -360,7 +361,7 @@ void DetectFoc::on_calcApplyLocalButton_clicked()
         double bw = 1.0 / (tc * 1e-6);
         double kp = l * bw;
         double ki = r * bw;
-        double gain = 0.001 / (lambda * lambda);
+        double gain = 1.0e-3 / (lambda * lambda);
 
         mVesc->mcConfig()->updateParamDouble("foc_current_kp", kp);
         mVesc->mcConfig()->updateParamDouble("foc_current_ki", ki);
