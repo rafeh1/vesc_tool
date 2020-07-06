@@ -1172,6 +1172,82 @@ p, li { white-space: pre-wrap; }
             <suffix> Hz</suffix>
             <vTx>3</vTx>
         </app_adc_conf.update_rate_hz>
+        <app_adc_conf.pedelec_max_rpm>
+            <longName>Pedelec Max RPM</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The Max RPM of the pedal sensor above which we will set throttle to its maximum&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_ADC_PEDELEC_MAX_RPM</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>120</maxDouble>
+            <minDouble>40</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>100</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_adc_conf.pedelec_max_rpm>
+        <app_adc_conf.pedelec_min_rpm>
+            <longName>Pedelec Min RPM</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The Min RPM of the pedal sensor below which we will set throttle to its minimum&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_ADC_PEDELEC_MIN_RPM</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>60</maxDouble>
+            <minDouble>10</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>1</stepDouble>
+            <valDouble>10</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix></suffix>
+            <vTx>9</vTx>
+        </app_adc_conf.pedelec_min_rpm>
+        <app_adc_conf.pedelec_magnets>
+            <longName>Pedelec Magnets</longName>
+            <type>2</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The number of magnets the pedal sensor has&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_ADC_PEDELEC_MAGNETS</cDefine>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxInt>30</maxInt>
+            <minInt>1</minInt>
+            <showDisplay>0</showDisplay>
+            <stepInt>1</stepInt>
+            <valInt>5</valInt>
+            <suffix></suffix>
+            <vTx>3</vTx>
+        </app_adc_conf.pedelec_magnets>
+        <app_adc_conf.pedelec_is_on>
+            <longName>Pedelec Is ON</longName>
+            <type>5</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If you want to enable the bike pedelec set to true&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>APPCONF_PEDELEC_IS_ON</cDefine>
+            <valInt>0</valInt>
+        </app_adc_conf.pedelec_is_on>
         <app_uart_baudrate>
             <longName>Baudrate</longName>
             <type>2</type>
@@ -1866,7 +1942,7 @@ p, li { white-space: pre-wrap; }
             <vTx>9</vTx>
         </app_balance_conf.adc2>
         <app_balance_conf.overspeed_duty>
-            <longName>Cutoff Duty Cycle (Causes "Dead" State)</longName>
+            <longName>Cutoff Duty Cycle (Causes &quot;Dead&quot; State)</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2351,7 +2427,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>10</stepInt>
-            <valInt>1,000</valInt>
+            <valInt>0</valInt>
             <suffix> ERPM</suffix>
             <vTx>3</vTx>
         </app_balance_conf.adc_half_fault_erpm>
@@ -2413,7 +2489,7 @@ p, li { white-space: pre-wrap; }
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
             <maxDouble>80</maxDouble>
-            <minDouble>-0</minDouble>
+            <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
             <valDouble>80</valDouble>
@@ -2901,6 +2977,10 @@ p, li { white-space: pre-wrap; }
         <ser>app_adc_conf.tc</ser>
         <ser>app_adc_conf.tc_max_diff</ser>
         <ser>app_adc_conf.update_rate_hz</ser>
+        <ser>app_adc_conf.pedelec_max_rpm</ser>
+        <ser>app_adc_conf.pedelec_min_rpm</ser>
+        <ser>app_adc_conf.pedelec_magnets</ser>
+        <ser>app_adc_conf.pedelec_is_on</ser>
         <ser>app_uart_baudrate</ser>
         <ser>app_chuk_conf.ctrl_type</ser>
         <ser>app_chuk_conf.hyst</ser>
@@ -3080,6 +3160,15 @@ p, li { white-space: pre-wrap; }
                     <param>app_adc_conf.throttle_exp</param>
                     <param>app_adc_conf.throttle_exp_brake</param>
                     <param>app_adc_conf.throttle_exp_mode</param>
+                </subgroupParams>
+            </subgroup>
+            <subgroup>
+                <subgroupName>Pedelec</subgroupName>
+                <subgroupParams>
+                    <param>app_adc_conf.pedelec_max_rpm</param>
+                    <param>app_adc_conf.pedelec_min_rpm</param>
+                    <param>app_adc_conf.pedelec_magnets</param>
+                    <param>app_adc_conf.pedelec_is_on</param>
                 </subgroupParams>
             </subgroup>
         </group>
