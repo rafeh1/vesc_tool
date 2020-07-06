@@ -62,7 +62,7 @@ Item {
                 id: text
                 Layout.fillWidth: true
                 color: "white"
-                text: qsTr("These are the VESCs paired to this instance of VESC Tool.")
+                text: qsTr("These are the VESCs paired to this instance of Calibike.")
                 font.bold: true
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
@@ -262,7 +262,7 @@ Item {
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
             wrapMode: Text.WordWrap
-            text: "This is going to pair the connected VESC with this instance of VESC Tool. VESC Tool instances " +
+            text: "This is going to pair the connected VESC with this instance of Calibike. Calibike instances " +
                   "that are not paired with this VESC will not be able to connect over bluetooth any more. Continue?"
         }
 

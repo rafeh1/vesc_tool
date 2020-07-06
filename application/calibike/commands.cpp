@@ -242,11 +242,43 @@ void Commands::processPacket(QByteArray data)
         }
 
         emit valuesReceived(values, mask);
+
+        CALIBIKE_LOGGING_VALUES loggingValues;
+        loggingValues.values = values;
+        loggingValues.code = CONSOLE_LOGGING_COMM_GET_VALUES;
+        loggingValues.timestamp =  QTime::currentTime();
+        emit printCalibikeLogging(loggingValues);
+
+
     } break;
 
     case COMM_PRINT:
+    {
+        isPwdSaved = false;
+
+        CALIBIKE_LOGGING_VALUES loggingPrint;
+        loggingPrint.command = QString::fromLatin1(vb);
+        loggingPrint.code = CONSOLE_LOGGING_COMM_PRINT;
+        loggingPrint.timestamp =  QTime::currentTime();
+        emit printCalibikeLogging(loggingPrint);
+
         emit printReceived(QString::fromLatin1(vb));
+
+        consoleMessage = QString::fromLatin1(vb);
+        if ( consoleMessage.contains("password saved:") )
+        {
+            isPwdSaved = true;
+            emit verifyPassword(isPwdSaved, unlockFirst);
+        }
+
+        isSystemLocked = false;
+        if ( consoleMessage.contains("system locked by user password") )
+        {
+            isSystemLocked = true;
+            emit systemLocked(isSystemLocked);
+        }
         break;
+    }
 
     case COMM_SAMPLE_PRINT:
         emit samplesReceived(vb);
@@ -711,6 +743,12 @@ void Commands::sendTerminalCmd(QString cmd)
     vb.vbAppendInt8(COMM_TERMINAL_CMD);
     vb.append(cmd.toLatin1());
     emitData(vb);
+
+    CALIBIKE_LOGGING_VALUES logging;
+    logging.command = cmd;
+    logging.timestamp =  QTime::currentTime();
+    logging.code = CONSOLE_LOGGING_COMM_TERMINAL_CMD;
+    emit printCalibikeLogging(logging);
 }
 
 void Commands::sendTerminalCmdSync(QString cmd)
@@ -719,6 +757,10 @@ void Commands::sendTerminalCmdSync(QString cmd)
     vb.vbAppendInt8(COMM_TERMINAL_CMD_SYNC);
     vb.append(cmd.toLatin1());
     emitData(vb);
+
+    CALIBIKE_LOGGING_VALUES logging;
+    logging.code = CONSOLE_LOGGING_COMM_ALIVE;
+    emit printCalibikeLogging(logging);
 }
 
 void Commands::setDutyCycle(double dutyCycle)

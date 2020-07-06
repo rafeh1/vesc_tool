@@ -20,7 +20,6 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import Qt.labs.settings 1.0 as QSettings
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -35,148 +34,12 @@ ApplicationWindow {
     property ConfigParams mInfoConf: VescIf.infoConfig()
 
     visible: true
-    width: 500
-    height: 850
-    title: qsTr("VESC Tool")
+    width: 640
+    height: 480
+    title: qsTr("Calibike tool")
 
     Component.onCompleted: {
-        //        Utility.checkVersion(VescIf)
-        //        swipeView.setCurrentIndex(1)
-        //        rtSwipeView.setCurrentIndex(1)
-
-        if (!VescIf.isIntroDone()) {
-            introWizard.openDialog()
-        }
-
         Utility.keepScreenOn(VescIf.keepScreenOn())
-        Utility.stopGnssForegroundService()
-    }
-
-    SetupWizardIntro {
-        id: introWizard
-    }
-
-    Controls {
-        id: controls
-        parentWidth: appWindow.width
-        parentHeight: appWindow.height - footer.height - tabBar.height
-    }
-
-    Settings {
-        id: settings
-    }
-
-    Drawer {
-        id: drawer
-        width: 0.5 * appWindow.width
-        height: appWindow.height - footer.height - tabBar.height
-        y: tabBar.height
-        dragMargin: 20
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 10
-            spacing: 0
-
-            Image {
-                id: image
-                Layout.preferredWidth: Math.min(parent.width, parent.height)
-                Layout.preferredHeight: (394 * Layout.preferredWidth) / 1549
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc:/res/logo_white.png"
-            }
-
-            Button {
-                id: reconnectButton
-
-                Layout.fillWidth: true
-                text: "Reconnect"
-                enabled: false
-                flat: true
-
-                onClicked: {
-                    VescIf.reconnectLastPort()
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Disconnect"
-                enabled: connBle.disconnectButton.enabled
-                flat: true
-
-                onClicked: {
-                    VescIf.disconnectPort()
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Controls"
-                flat: true
-
-                onClicked: {
-                    drawer.close()
-                    controls.openDialog()
-                }
-            }
-
-            Item {
-                // Spacer
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Settings"
-                flat: true
-
-                onClicked: {
-                    drawer.close()
-                    settings.openDialog()
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "About"
-                flat: true
-
-                onClicked: {
-                    VescIf.emitMessageDialog(
-                                "About",
-                                Utility.aboutText(),
-                                true, true)
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Changelog"
-                flat: true
-
-                onClicked: {
-                    VescIf.emitMessageDialog(
-                                "VESC Tool Changelog",
-                                Utility.vescToolChangeLog(),
-                                true, false)
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "License"
-                flat: true
-
-                onClicked: {
-                    VescIf.emitMessageDialog(
-                                mInfoConf.getLongName("gpl_text"),
-                                mInfoConf.getDescription("gpl_text"),
-                                true, true)
-                }
-            }
-        }
     }
 
     SwipeView {
@@ -184,15 +47,53 @@ ApplicationWindow {
         currentIndex: tabBar.currentIndex
         anchors.fill: parent
 
+        Drawer {
+            id: drawer
+            width: 0.5 * appWindow.width
+            height: appWindow.height - footer.height - tabBar.height
+            y: tabBar.height
+            dragMargin: 20
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 10
+                spacing: 0
+
+                Image {
+                    Layout.preferredWidth: Math.min(parent.width, parent.height)
+                    Layout.preferredHeight: (394 * Layout.preferredWidth) / 1549
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                    source: "qrc:/res/calibike_logo_mobile.png"
+                }
+
+                Item {
+                    // Spacer
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    text: "About"
+                    flat: true
+
+                    onClicked: {
+                        VescIf.emitMessageDialog(
+                                    "About",
+                                    Utility.aboutTextCalibike(),
+                                    true, true)
+                    }
+                }
+
+            }
+        }
+
         Page {
             ConnectBle {
                 id: connBle
                 anchors.fill: parent
+                /* offset due header menu */
                 anchors.margins: 10
-
-                onRequestOpenControls: {
-                    controls.openDialog()
-                }
             }
         }
 
@@ -201,26 +102,11 @@ ApplicationWindow {
                 anchors.fill: parent
                 spacing: 0
 
-                Rectangle {
-                    color: "#4f4f4f"
-                    width: 16
-                    Layout.fillHeight: true
-                    Layout.alignment: Qt.AlignHCenter |  Qt.AlignVCenter
-
-                    PageIndicator {
-                        count: rtSwipeView.count
-                        currentIndex: rtSwipeView.currentIndex
-                        anchors.centerIn: parent
-                        rotation: 90
-                    }
-                }
-
+                // Gauges page
                 SwipeView {
                     id: rtSwipeView
                     enabled: true
                     clip: true
-
-                    property var vesc3dViewNow: 0
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -231,78 +117,16 @@ ApplicationWindow {
                             anchors.fill: parent
                         }
                     }
-
-                    Page {
-                        RtDataSetup {
-                            anchors.fill: parent
-                        }
-                    }
-
-                    Page {
-                        ColumnLayout {
-                            anchors.fill: parent
-
-                            CheckBox {
-                                Layout.fillWidth: true
-                                id: useYawBox
-                                text: "Use Yaw (will drift)"
-                                checked: false
-                            }
-
-                            Item {
-                                id: item3d
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                            }
-                        }
-                    }
-
-                    // Create 3d view on demand, due to high CPU usage even when hidden
-                    onCurrentIndexChanged: {
-                        if (currentIndex == 2) {
-                            var component = Qt.createComponent("Vesc3DView.qml");
-                            vesc3dViewNow = component.createObject(item3d, {"anchors.fill": item3d})
-                            vesc3dViewNow.setRotation(0.1, 0.1, 0.1)
-                        } else {
-                            if (vesc3dViewNow != 0) {
-                                vesc3dViewNow.destroy()
-                                vesc3dViewNow = 0
-                            }
-                        }
-                    }
                 }
             }
         }
 
         Page {
-            Profiles {
+            CalibikeUserConfig {
                 anchors.fill: parent
                 anchors.leftMargin: 10
                 anchors.rightMargin: 10
-            }
-        }
-
-        Page {
-            ConfigPageMotor {
-                id: confPageMotor
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-            }
-        }
-
-        Page {
-            ConfigPageApp {
-                id: confPageApp
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-            }
-        }
-
-        Page {
-            FwUpdate {
-                anchors.fill: parent
+                anchors.topMargin: 10
             }
         }
 
@@ -387,10 +211,6 @@ ApplicationWindow {
                                 anchors.margins: 7
                                 font.pointSize: 12
                                 text: "./log"
-
-                                QSettings.Settings {
-                                    property alias rtLog: rtLogFileText.text
-                                }
                             }
                         }
 
@@ -401,18 +221,10 @@ ApplicationWindow {
                             Layout.columnSpan: 2
 
                             onClicked: {
-                                if (checked) {
-                                    if (VescIf.openRtLogFile(rtLogFileText.text)) {
-                                        Utility.startGnssForegroundService()
-                                        VescIf.setWakeLock(true)
-                                    }
+                                if (rtLogEnBox.checked) {
+                                    VescIf.openRtLogFile(rtLogFileText.text)
                                 } else {
                                     VescIf.closeRtLogFile()
-                                    Utility.stopGnssForegroundService()
-
-                                    if (!VescIf.useWakeLock()) {
-                                        VescIf.setWakeLock(false)
-                                    }
                                 }
                             }
 
@@ -422,14 +234,6 @@ ApplicationWindow {
                                 interval: 500
 
                                 onTriggered: {
-                                    if (rtLogEnBox.checked && !VescIf.isRtLogOpen()) {
-                                        Utility.stopGnssForegroundService()
-
-                                        if (!VescIf.useWakeLock()) {
-                                            VescIf.setWakeLock(false)
-                                        }
-                                    }
-
                                     rtLogEnBox.checked = VescIf.isRtLogOpen()
                                 }
                             }
@@ -438,8 +242,8 @@ ApplicationWindow {
                 }
 
                 GroupBox {
-                    id: tcpServerBox
-                    title: qsTr("TCP Server")
+                    id: consoleLogBox
+                    title: qsTr("Console Logging")
                     Layout.fillWidth: true
                     Layout.columnSpan: 1
 
@@ -455,83 +259,67 @@ ApplicationWindow {
                         rows: 3
                         columns: 2
 
+                        Button {
+                            text: "Choose Log Directory..."
+                            Layout.fillWidth: true
+
+                            onClicked: {
+                                if (Utility.requestFilePermission()) {
+                                    logConsolePicker.enabled = true
+                                    logConsolePicker.visible = true
+                                } else {
+                                    VescIf.emitMessageDialog(
+                                                "File Permissions",
+                                                "Unable to request file system permission.",
+                                                false, false)
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            Layout.topMargin: 6
+                            Layout.bottomMargin: 6
+                            height: consoleLogFileText.implicitHeight + 14
+                            border.width: 2
+                            border.color: "#8d8d8d"
+                            color: "#33a8a8a8"
+                            radius: 3
+
+                            TextInput {
+                                color: "white"
+                                id: consoleLogFileText
+                                anchors.fill: parent
+                                anchors.margins: 7
+                                font.pointSize: 12
+                                text: "./consoleLog"
+                            }
+                        }
+
                         CheckBox {
-                            id: tcpServerEnBox
-                            text: "Run TCP Server"
+                            id: consoleLogEnBox
+                            text: "Enable Console Logging"
                             Layout.fillWidth: true
                             Layout.columnSpan: 2
 
                             onClicked: {
-                                if (checked) {
-                                    VescIf.tcpServerStart(tcpServerPortBox.value)
+                                if (consoleLogEnBox.checked) {
+                                    VescIf.openConsoleLogFile(consoleLogFileText.text)
                                 } else {
-                                    VescIf.tcpServerStop()
+                                    VescIf.closeConsoleLogFile()
                                 }
                             }
-                        }
 
-                        Text {
-                            text: "TCP Port"
-                            color: "white"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 5000
-                        }
+                            Timer {
+                                repeat: true
+                                running: true
+                                interval: 500
 
-                        SpinBox {
-                            id: tcpServerPortBox
-                            from: 0
-                            to: 65535
-                            value: 65102
-                            enabled: !tcpServerEnBox.checked
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 5000
-                            editable: true
-                        }
-
-                        Timer {
-                            repeat: true
-                            running: true
-                            interval: 500
-
-                            onTriggered: {
-                                tcpServerEnBox.checked = VescIf.tcpServerIsRunning()
-
-                                if (VescIf.tcpServerIsRunning()) {
-                                    var ipTxt = "IP(s)\n"
-                                    var addresses = Utility.getNetworkAddresses()
-                                    for (var i = 0;i < addresses.length;i++) {
-                                        ipTxt += addresses[i]
-                                        if (i < (addresses.length - 1)) {
-                                            ipTxt += "\n"
-                                        }
-                                    }
-                                    tcpLocalAddress.text = ipTxt
-                                } else {
-                                    tcpLocalAddress.text = "IP(s)"
-                                }
-
-                                tcpRemoteAddress.text = "Connected Client"
-
-                                if (VescIf.tcpServerIsClientConnected()) {
-                                    tcpRemoteAddress.text += "\n" + VescIf.tcpServerClientIp()
+                                onTriggered: {
+                                    consoleLogEnBox.checked = VescIf.isConsoleLogOpen()
                                 }
                             }
-                        }
-
-                        Text {
-                            id: tcpLocalAddress
-                            Layout.fillWidth: true
-                            Layout.topMargin: 10
-                            Layout.bottomMargin: 10
-                            color: "white"
-                        }
-
-                        Text {
-                            id: tcpRemoteAddress
-                            Layout.fillWidth: true
-                            Layout.topMargin: 10
-                            Layout.bottomMargin: 10
-                            color: "white"
                         }
                     }
                 }
@@ -554,7 +342,20 @@ ApplicationWindow {
                     rtLogFileText.text = fileName
                 }
             }
+
+            DirectoryPicker {
+                id: logConsolePicker
+                anchors.fill: parent
+                showDotAndDotDot: true
+                visible: false
+                enabled: false
+
+                onDirSelected: {
+                    consoleLogFileText.text = fileName
+                }
+            }
         }
+
     }
 
     header: Rectangle {
@@ -599,7 +400,7 @@ ApplicationWindow {
                     color: "#4f4f4f"
                 }
 
-                property int buttons: 8
+                property int buttons: 3
                 property int buttonWidth: 120
 
                 TabButton {
@@ -607,25 +408,14 @@ ApplicationWindow {
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
-                    text: qsTr("RT Data")
+                    text: qsTr("Metrics")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
                 TabButton {
-                    text: qsTr("Profiles")
+                    text: qsTr("User config")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
                 }
-                TabButton {
-                    text: qsTr("Motor Cfg")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("App Cfg")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Firmware")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
+
                 TabButton {
                     text: qsTr("Terminal")
                     width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
@@ -638,6 +428,7 @@ ApplicationWindow {
         }
     }
 
+    // The one that says por not connected.
     footer: Rectangle {
         id: connectedRect
         color: "#4f4f4f"
@@ -661,6 +452,7 @@ ApplicationWindow {
         running: false
         repeat: false
         onTriggered: {
+            // Asign to footer state
             connectedText.text = VescIf.getConnectedPortName()
             connectedRect.color = "#4f4f4f"
         }
@@ -708,30 +500,41 @@ ApplicationWindow {
 
         onTriggered: {
             if (VescIf.isPortConnected()) {
-                // Sample RT data when the corresponding page is selected, or when
-                // RT logging is active.
-
-                if (VescIf.isRtLogOpen()) {
+                if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0) ||
+                        VescIf.isRtLogOpen()) {
                     interval = 50
                     mCommands.getValues()
-                    mCommands.getValuesSetup()
-                    mCommands.getImuData(0xFFFF)
-                } else {
-                    if ((tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 0)) {
-                        interval = 50
-                        mCommands.getValues()
-                    }
-
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
-                        interval = 50
-                        mCommands.getValuesSetup()
-                    }
-
-                    if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 2) {
-                        interval = 20
-                        mCommands.getImuData(0x7)
-                    }
                 }
+
+                if (tabBar.currentIndex == 1 && rtSwipeView.currentIndex == 1) {
+                    interval = 50
+                    mCommands.getValuesSetup()
+                }
+            }
+        }
+    }
+
+
+    Timer {
+        id: movingSensingTimer
+        interval: 10000
+        running: true
+        repeat: true
+
+        onTriggered: {
+            VescIf.getDeviceMovementState()
+        }
+    }
+
+    Timer {
+        id: aliveTimerMain
+        interval: 200
+        running: true
+        repeat: true
+
+        onTriggered: {
+            if (VescIf.isPortConnected()) {
+                mCommands.sendAlive()
             }
         }
     }
@@ -741,13 +544,12 @@ ApplicationWindow {
         standardButtons: Dialog.Ok
         modal: true
         focus: true
-        closePolicy: Popup.CloseOnEscape
-
         width: parent.width - 20
         height: Math.min(implicitHeight, parent.height - 40)
+        closePolicy: Popup.CloseOnEscape
+
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
-        parent: ApplicationWindow.overlay
 
         ScrollView {
             anchors.fill: parent
@@ -773,15 +575,8 @@ ApplicationWindow {
         target: VescIf
         onPortConnectedChanged: {
             connectedText.text = VescIf.getConnectedPortName()
-            if (VescIf.isPortConnected()) {
-                reconnectButton.enabled = true
-            } else {
-                confTimer.mcConfRx = false
-                confTimer.appConfRx = false
-            }
+            if (VescIf.isPortConnected() && (VescIf.getCalibikeBleState() === true) )  {
 
-            if (VescIf.useWakeLock()) {
-                VescIf.setWakeLock(VescIf.isPortConnected())
             }
         }
 
@@ -800,13 +595,9 @@ ApplicationWindow {
 
         onFwRxChanged: {
             if (rx) {
-                if (limited && !VescIf.getFwSupportsConfiguration()) {
-                    confPageMotor.enabled = false
-                    confPageApp.enabled = false
+                if (limited) {
                     swipeView.setCurrentIndex(5)
                 } else {
-                    confPageMotor.enabled = true
-                    confPageApp.enabled = true
                     mCommands.getMcconf()
                     mCommands.getAppConf()
                 }
@@ -827,18 +618,6 @@ ApplicationWindow {
 
         onUpdated: {
             confTimer.appConfRx = true
-        }
-    }
-
-    Connections {
-        target: mCommands
-
-        onValuesImuReceived: {
-            if (rtSwipeView.vesc3dViewNow != 0) {
-                rtSwipeView.vesc3dViewNow.setRotation(
-                            values.roll, values.pitch,
-                            useYawBox.checked ? values.yaw : -Math.PI / 2.0)
-            }
         }
     }
 }

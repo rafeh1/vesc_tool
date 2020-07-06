@@ -84,6 +84,8 @@ public:
         return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
     }
 
+    Q_INVOKABLE static QString aboutTextCalibike();
+
 signals:
 
 public slots:

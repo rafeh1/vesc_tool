@@ -158,6 +158,7 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
 #endif
 
         emit scanDone(mDevs, false);
+        emit addDeviceCalibike(dev.address().toString());
     }
 }
 
@@ -311,4 +312,11 @@ void BleUart::connectionUpdated(const QLowEnergyConnectionParameters &newParamet
 {
     (void)newParameters;
     qDebug() << "BLE connection parameters updated";
+}
+
+
+
+void BleUart::stopScan()
+{
+    mDeviceDiscoveryAgent->stop();
 }

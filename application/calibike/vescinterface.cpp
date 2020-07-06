@@ -43,6 +43,9 @@
 #define VT_INTRO_VERSION 1
 #endif
 
+#include <QDesktopServices>
+#include <QRegularExpression>
+
 VescInterface::VescInterface(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<MCCONF_TEMP>();
@@ -255,14 +258,14 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     connect(mCommands, &Commands::valuesReceived, [this](MC_VALUES v) {
         if (mRtLogFile.isOpen()) {
-            int msPos = -1;
-            double lat = 0.0;
-            double lon = 0.0;
-            double alt = 0.0;
-            double gVel = 0.0;
-            double vVel = 0.0;
-            double hAcc = 0.0;
-            double vAcc = 0.0;
+//            int msPos = -1;
+//            double lat = 0.0;
+//            double lon = 0.0;
+//            double alt = 0.0;
+//            double gVel = 0.0;
+//            double vVel = 0.0;
+//            double hAcc = 0.0;
+//            double vAcc = 0.0;
 
 #ifdef HAS_POS
             if (mLastPos.isValid() && mLastPosTime.isValid() &&
@@ -308,81 +311,85 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
             os << t.msecsSinceStartOfDay() << ";";
             os << v.v_in << ";";
-            os << v.temp_mos << ";";
-            os << v.temp_mos_1 << ";";
-            os << v.temp_mos_2 << ";";
-            os << v.temp_mos_3 << ";";
-            os << v.temp_motor << ";";
-            os << v.current_motor << ";";
+//            os << v.temp_mos << ";";
+//            os << v.temp_mos_1 << ";";
+//            os << v.temp_mos_2 << ";";
+//            os << v.temp_mos_3 << ";";
+//            os << v.temp_motor << ";";
+//            os << v.current_motor << ";";
             os << v.current_in << ";";
-            os << v.id << ";";
-            os << v.iq << ";";
-            os << v.rpm << ";";
-            os << v.duty_now << ";";
-            os << v.amp_hours << ";";
-            os << v.amp_hours_charged << ";";
-            os << v.watt_hours << ";";
-            os << v.watt_hours_charged << ";";
-            os << v.tachometer << ";";
-            os << v.tachometer_abs << ";";
-            os << v.position << ";";
-            os << v.fault_code << ";";
-            os << v.vesc_id << ";";
+//            os << v.id << ";";
+//            os << v.iq << ";";
+//            os << v.rpm << ";";
+//            os << v.duty_now << ";";
+//            os << v.amp_hours << ";";
+//            os << v.amp_hours_charged << ";";
+//            os << v.watt_hours << ";";
+//            os << v.watt_hours_charged << ";";
+//            os << v.tachometer << ";";
+//            os << v.tachometer_abs << ";";
+//            os << v.position << ";";
+//            os << v.fault_code << ";";
+//            os << v.vesc_id << ";";
             os << v.vd << ";";
             os << v.vq << ";";
 
-            os << msSetup << ";";
-            os << mLastSetupValues.amp_hours << ";";
-            os << mLastSetupValues.amp_hours_charged << ";";
-            os << mLastSetupValues.watt_hours << ";";
-            os << mLastSetupValues.watt_hours_charged << ";";
-            os << mLastSetupValues.battery_level << ";";
-            os << mLastSetupValues.battery_wh << ";";
-            os << mLastSetupValues.current_in << ";";
-            os << mLastSetupValues.current_motor << ";";
-            os << mLastSetupValues.speed << ";";
-            os << mLastSetupValues.tachometer << ";";
-            os << mLastSetupValues.tachometer_abs << ";";
-            os << mLastSetupValues.num_vescs << ";";
+            os << v.current_in * v.v_in  << ";";
+            os << mGPSvalues.gVel << ";";
 
-            os << msImu << ";";
-            os << mLastImuValues.roll << ";";
-            os << mLastImuValues.pitch << ";";
-            os << mLastImuValues.yaw << ";";
-            os << mLastImuValues.accX << ";";
-            os << mLastImuValues.accY << ";";
-            os << mLastImuValues.accZ << ";";
-            os << mLastImuValues.gyroX << ";";
-            os << mLastImuValues.gyroY << ";";
-            os << mLastImuValues.gyroZ << ";";
 
-            os << msPos << ";";
-            os << fixed << qSetRealNumberPrecision(8) << lat << ";";
-            os << fixed << qSetRealNumberPrecision(8) << lon << ";";
-            os << alt << ";";
-            os << gVel << ";";
-            os << vVel << ";";
-            os << hAcc << ";";
-            os << vAcc << ";";
+//            os << msSetup << ";";
+//            os << mLastSetupValues.amp_hours << ";";
+//            os << mLastSetupValues.amp_hours_charged << ";";
+//            os << mLastSetupValues.watt_hours << ";";
+//            os << mLastSetupValues.watt_hours_charged << ";";
+//            os << mLastSetupValues.battery_level << ";";
+//            os << mLastSetupValues.battery_wh << ";";
+//            os << mLastSetupValues.current_in << ";";
+//            os << mLastSetupValues.current_motor << ";";
+//            os << mLastSetupValues.speed << ";";
+//            os << mLastSetupValues.tachometer << ";";
+//            os << mLastSetupValues.tachometer_abs << ";";
+//            os << mLastSetupValues.num_vescs << ";";
+
+//            os << msImu << ";";
+//            os << mLastImuValues.roll << ";";
+//            os << mLastImuValues.pitch << ";";
+//            os << mLastImuValues.yaw << ";";
+//            os << mLastImuValues.accX << ";";
+//            os << mLastImuValues.accY << ";";
+//            os << mLastImuValues.accZ << ";";
+//            os << mLastImuValues.gyroX << ";";
+//            os << mLastImuValues.gyroY << ";";
+//            os << mLastImuValues.gyroZ << ";";
+
+//            os << msPos << ";";
+//            os << fixed << qSetRealNumberPrecision(8) << lat << ";";
+//            os << fixed << qSetRealNumberPrecision(8) << lon << ";";
+//            os << alt << ";";
+//            os << gVel << ";";
+//            os << vVel << ";";
+//            os << hAcc << ";";
+//            os << vAcc << ";";
             os << "\n";
             os.flush();
 
-            LOG_DATA d;
-            d.values = v;
-            d.setupValues = mLastSetupValues;
-            d.imuValues = mLastImuValues;
-            d.valTime = t.msecsSinceStartOfDay();
-            d.setupValTime = msSetup;
-            d.imuValTime = msImu;
-            d.posTime = msPos;
-            d.lat = lat;
-            d.lon = lon;
-            d.alt = alt;
-            d.gVel = gVel;
-            d.vVel = vVel;
-            d.hAcc = hAcc;
-            d.vAcc = vAcc;
-            mRtLogData.append(d);
+//            LOG_DATA d;
+//            d.values = v;
+//            d.setupValues = mLastSetupValues;
+//            d.imuValues = mLastImuValues;
+//            d.valTime = t.msecsSinceStartOfDay();
+//            d.setupValTime = msSetup;
+//            d.imuValTime = msImu;
+//            d.posTime = msPos;
+//            d.lat = lat;
+//            d.lon = lon;
+//            d.alt = alt;
+//            d.gVel = gVel;
+//            d.vVel = vVel;
+//            d.hAcc = hAcc;
+//            d.vAcc = vAcc;
+//            mRtLogData.append(d);
         }
     });
 
@@ -422,12 +429,95 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
                           false);
     });
 #endif
+
+    // Autoreconnect when in range
+ #ifdef HAS_BLUETOOTH
+    calibikeIsConnected = false;
+    calibikeWasConnected = false;
+    calibikeAutoReconnectState = DISABLED;
+
+    mTimerFromDisconnect = new QTimer(this);
+    mTimerFromDisconnect->setInterval(5000);
+    mTimerFromDisconnect->start();
+    connect(mTimerFromDisconnect, SIGNAL(timeout()), this, SLOT(reconnectWhenDisconnect()));
+#endif
+
+    mTimerStatus = new QTimer(this);
+    mTimerStatus->setInterval(1600);
+    mTimerStatus->start();
+    connect(mTimerStatus, SIGNAL(timeout()), this, SLOT(timerStatusTimeout()));
+
+#ifdef HAS_POS_CALIBIKE
+    mPosSource = nullptr;
+
+    mPosSource = QGeoPositionInfoSource::createDefaultSource(this);
+    if (mPosSource) {
+        connect(mPosSource, &QGeoPositionInfoSource::positionUpdated,
+                [this](QGeoPositionInfo info) {
+            mLastPos = info;
+            mLastPosTime = QDateTime::currentDateTimeUtc();
+        });
+        mPosSource->setUpdateInterval(5);
+        mPosSource->startUpdates();
+    }
+#endif
+
+    mLastPwd = mSettings.value("locking_pwd", "Calibike").toString();
+    mLastEmail = mSettings.value("locking_email", "").toString();
+    mKeepAutoScan = false;
+    mAppLaunchState = 0;
+    movingPoints = 0;
+    movingIterations = 0;
+    deviceMovingState = false;
+
+    connect(mBleUart, SIGNAL(addDeviceCalibike(QString)), this, SLOT(bleAddDeviceCalibike(QString)));
+
+
+    connect(mCommands, &Commands::printCalibikeLogging, [this](CALIBIKE_LOGGING_VALUES loggingValues) {
+        if (mConsoleLogFile.isOpen()) {
+            auto t = QTime::currentTime();
+            QTextStream os(&mConsoleLogFile);
+
+            /* Cases where connected is not there is because data is coming from process packet
+             * If process packet is missing means that device is not connected.
+            */
+            os << t.msecsSinceStartOfDay() << "\n";
+            switch (loggingValues.code) {
+                case CONSOLE_LOGGING_TIMER_DEVICE_STATUS: {
+                    os << "CONNECTED: " + QString::number(loggingValues.connectedState) << "\n";
+                } break;
+                case CONSOLE_LOGGING_COMM_ALIVE: {
+                    os << "ALIVE"  << "\n";
+                } break;
+                case CONSOLE_LOGGING_COMM_PRINT: {
+                    os << loggingValues.command << "\n";
+                } break;
+                case CONSOLE_LOGGING_COMM_TERMINAL_CMD: {
+                    os << loggingValues.command << "\n";
+                    os << "CONNECTED: " + QString::number(this->isPortConnected()) << "\n";
+                } break;
+                case CONSOLE_LOGGING_COMM_GET_VALUES: {
+                    os << "Speed (km/h): ";
+                    os << mGPSvalues.gVel << "\n";
+                    os << "Voltage (V): ";
+                    os << loggingValues.values.v_in << "\n";
+                    os << "Current (A): ";
+                    os << loggingValues.values.current_in << "\n";
+                    os << "Power (W): ";
+                    os << (loggingValues.values.current_in * loggingValues.values.v_in) << "\n";
+                } break;
+            }
+            os.flush();
+        }
+    });
+
 }
 
 VescInterface::~VescInterface()
 {
     storeSettings();
     closeRtLogFile();
+    closeConsoleLogFile();
 
     if (mWakeLockActive) {
         setWakeLock(false);
@@ -1433,69 +1523,69 @@ bool VescInterface::openRtLogFile(QString outDirectory)
 
     bool res = mRtLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
 
-    if (mRtLogFile.isOpen()) {
-        QTextStream os(&mRtLogFile);
-        os << "ms_today" << ";";
-        os << "input_voltage" << ";";
-        os << "temp_mos_max" << ";";
-        os << "temp_mos_1" << ";";
-        os << "temp_mos_2" << ";";
-        os << "temp_mos_3" << ";";
-        os << "temp_motor" << ";";
-        os << "current_motor" << ";";
-        os << "current_in" << ";";
-        os << "d_axis_current" << ";";
-        os << "q_axis_current" << ";";
-        os << "erpm" << ";";
-        os << "duty_cycle" << ";";
-        os << "amp_hours_used" << ";";
-        os << "amp_hours_charged" << ";";
-        os << "watt_hours_used" << ";";
-        os << "watt_hours_charged" << ";";
-        os << "tachometer" << ";";
-        os << "tachometer_abs" << ";";
-        os << "encoder_position" << ";";
-        os << "fault_code" << ";";
-        os << "vesc_id" << ";";
-        os << "d_axis_voltage" << ";";
-        os << "q_axis_voltage" << ";";
+//    if (mRtLogFile.isOpen()) {
+//        QTextStream os(&mRtLogFile);
+//        os << "ms_today" << ";";
+//        os << "input_voltage" << ";";
+//        os << "temp_mos_max" << ";";
+//        os << "temp_mos_1" << ";";
+//        os << "temp_mos_2" << ";";
+//        os << "temp_mos_3" << ";";
+//        os << "temp_motor" << ";";
+//        os << "current_motor" << ";";
+//        os << "current_in" << ";";
+//        os << "d_axis_current" << ";";
+//        os << "q_axis_current" << ";";
+//        os << "erpm" << ";";
+//        os << "duty_cycle" << ";";
+//        os << "amp_hours_used" << ";";
+//        os << "amp_hours_charged" << ";";
+//        os << "watt_hours_used" << ";";
+//        os << "watt_hours_charged" << ";";
+//        os << "tachometer" << ";";
+//        os << "tachometer_abs" << ";";
+//        os << "encoder_position" << ";";
+//        os << "fault_code" << ";";
+//        os << "vesc_id" << ";";
+//        os << "d_axis_voltage" << ";";
+//        os << "q_axis_voltage" << ";";
 
-        os << "ms_today_setup" << ";";
-        os << "amp_hours_setup" << ";";
-        os << "amp_hours_charged_setup" << ";";
-        os << "watt_hours_setup" << ";";
-        os << "watt_hours_charged_setup" << ";";
-        os << "battery_level" << ";";
-        os << "battery_wh_tot" << ";";
-        os << "current_in_setup" << ";";
-        os << "current_motor_setup" << ";";
-        os << "speed_meters_per_sec" << ";";
-        os << "tacho_meters" << ";";
-        os << "tacho_abs_meters" << ";";
-        os << "num_vescs" << ";";
+//        os << "ms_today_setup" << ";";
+//        os << "amp_hours_setup" << ";";
+//        os << "amp_hours_charged_setup" << ";";
+//        os << "watt_hours_setup" << ";";
+//        os << "watt_hours_charged_setup" << ";";
+//        os << "battery_level" << ";";
+//        os << "battery_wh_tot" << ";";
+//        os << "current_in_setup" << ";";
+//        os << "current_motor_setup" << ";";
+//        os << "speed_meters_per_sec" << ";";
+//        os << "tacho_meters" << ";";
+//        os << "tacho_abs_meters" << ";";
+//        os << "num_vescs" << ";";
 
-        os << "ms_today_imu" << ";";
-        os << "roll" << ";";
-        os << "pitch" << ";";
-        os << "yaw" << ";";
-        os << "accX" << ";";
-        os << "accY" << ";";
-        os << "accZ" << ";";
-        os << "gyroX" << ";";
-        os << "gyroY" << ";";
-        os << "gyroZ" << ";";
+//        os << "ms_today_imu" << ";";
+//        os << "roll" << ";";
+//        os << "pitch" << ";";
+//        os << "yaw" << ";";
+//        os << "accX" << ";";
+//        os << "accY" << ";";
+//        os << "accZ" << ";";
+//        os << "gyroX" << ";";
+//        os << "gyroY" << ";";
+//        os << "gyroZ" << ";";
 
-        os << "gnss_posTime" << ";";
-        os << "gnss_lat" << ";";
-        os << "gnss_lon" << ";";
-        os << "gnss_alt" << ";";
-        os << "gnss_gVel" << ";";
-        os << "gnss_vVel" << ";";
-        os << "gnss_hAcc" << ";";
-        os << "gnss_vAcc" << ";";
-        os << "\n";
-        os.flush();
-    }
+//        os << "gnss_posTime" << ";";
+//        os << "gnss_lat" << ";";
+//        os << "gnss_lon" << ";";
+//        os << "gnss_alt" << ";";
+//        os << "gnss_gVel" << ";";
+//        os << "gnss_vVel" << ";";
+//        os << "gnss_hAcc" << ";";
+//        os << "gnss_vAcc" << ";";
+//        os << "\n";
+//        os.flush();
+//    }
 
     if (!res) {
         emitMessageDialog("Log to file",
@@ -1503,7 +1593,7 @@ bool VescInterface::openRtLogFile(QString outDirectory)
                           false, false);
     }
 
-    mRtLogData.clear();
+//    mRtLogData.clear();
 
     if (res) {
 #ifdef HAS_POS
@@ -2634,6 +2724,14 @@ void VescInterface::timerSlot()
         mIsUploadingFw = false;
     }
 
+    /* Updates mWasConnected if change happens
+        mWasConnected is only modified here
+    */
+    if (mWasConnected && (isPortConnected() == false) && (buttonPressed != true)) {
+        emit calibikePortDisconnect();
+    }
+    buttonPressed = false;
+
     if (mWasConnected != isPortConnected()) {
         mWasConnected = isPortConnected();
 
@@ -2647,6 +2745,8 @@ void VescInterface::timerSlot()
 
         emit portConnectedChanged();
     }
+
+
 }
 
 void VescInterface::packetDataToSend(QByteArray &data)
@@ -3058,6 +3158,8 @@ void VescInterface::fwVersionReceived(int major, int minor, QString hw, QByteArr
                           "update the firmware urgently, as this is not a safe situation.",
                           false, false);
     }
+
+    mCommands->sendTerminalCmd("ul " + mLastPwd);
 }
 
 void VescInterface::appconfUpdated()
@@ -3348,4 +3450,287 @@ void VescInterface::setLastConnectionType(conn_t type)
 {
     mLastConnType = type;
     mSettings.setValue("connection_type", type);
+}
+
+
+bool VescInterface::openConsoleLogFile(QString outDirectory)
+{
+    if (outDirectory.startsWith("file:/")) {
+        outDirectory.remove(0, 6);
+    }
+
+    if (!QDir(outDirectory).exists()) {
+        QDir().mkpath(outDirectory);
+    }
+
+    if (!QDir(outDirectory).exists()) {
+        emitMessageDialog("Log to file",
+                          "Output directory does not exist",
+                          false, false);
+        return false;
+    }
+
+    QDateTime d = QDateTime::currentDateTime();
+    mConsoleLogFile.setFileName(QString("%1/console-logging-%2-%3-%4_%5:%6:%7.csv").
+                           arg(outDirectory).
+                           arg(d.date().year(), 2, 10, QChar('0')).
+                           arg(d.date().month(), 2, 10, QChar('0')).
+                           arg(d.date().day(), 2, 10, QChar('0')).
+                           arg(d.time().hour(), 2, 10, QChar('0')).
+                           arg(d.time().minute(), 2, 10, QChar('0')).
+                           arg(d.time().second(), 2, 10, QChar('0')));
+
+    bool res = mConsoleLogFile.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    if (!res) {
+        emitMessageDialog("Log to file",
+                          "Could not open file for writing.",
+                          false, false);
+    }
+
+    return res;
+}
+
+void VescInterface::closeConsoleLogFile()
+{
+    if (mConsoleLogFile.isOpen()) {
+        mConsoleLogFile.close();
+    }
+}
+
+bool VescInterface::isConsoleLogOpen()
+{
+    return mConsoleLogFile.isOpen();
+}
+
+
+#ifdef HAS_POS_CALIBIKE
+void VescInterface::getPosition()
+{
+
+    int msPos = -1;
+
+    if (mLastPos.isValid() && mLastPosTime.isValid() &&
+            mLastPosTime.secsTo(QDateTime::currentDateTime()) < 3)
+    {
+        msPos = mLastPos.timestamp().time().msecsSinceStartOfDay();
+        mGPSvalues.lat = mLastPos.coordinate().latitude();
+        mGPSvalues.lon = mLastPos.coordinate().longitude();
+    }
+
+    if (mLastPos.hasAttribute(QGeoPositionInfo::GroundSpeed)) {
+        mGPSvalues.gVel = mLastPos.attribute(QGeoPositionInfo::GroundSpeed)*3.6; // Convert to km / h
+    }
+}
+
+double VescInterface::getGPSLat()
+{
+    return mGPSvalues.lat;
+}
+
+double VescInterface::getGPSLon()
+{
+    return mGPSvalues.lon;
+}
+
+double VescInterface::getGPSSpeed()
+{
+    return mGPSvalues.gVel;
+}
+#endif
+
+
+QString VescInterface::getLastPwd() const
+{
+    return mLastPwd;
+}
+
+
+void VescInterface::setLastPwd(QString password)
+{
+    mLastPwd = password;
+    mSettings.setValue("locking_pwd", mLastPwd);
+}
+
+
+bool VescInterface::validateEmail(QString email)
+{
+    bool isEmailValid = true;
+    QRegularExpression regex("^[A-Z0-9a-z._-]{1,}@(\\w+)(\\.(\\w+))(\\.(\\w+))?(\\.(\\w+))?$");
+    if(!regex.match(email).hasMatch())
+    {
+        isEmailValid = false;
+    }
+    return isEmailValid;
+}
+
+void VescInterface::setEmail(QString email)
+{
+    mLastEmail = email;
+    mSettings.setValue("locking_email", email);
+}
+
+QString VescInterface::getEmail() const
+{
+    return mLastEmail;
+}
+
+void VescInterface::sendEmail()
+{
+    QString bleName;
+    bleName = getBleName(mLastBleAddr);
+    if ( bleName.length() == 0)
+    {
+        bleName = mLastCaliBleName;
+    }
+
+    QDesktopServices::openUrl(QUrl("mailto:?to=" + mLastEmail +
+                                   "&subject=" + "User configuration from Calibike" +
+                                   "&body=" +
+                                   "Password: " +
+                                   mLastPwd + "\n" +
+                                   "Bluetooth Address: " +
+                                   mLastBleAddr + "\n" +
+                                   "Bluetooth Name: " +
+                                   bleName,
+                                   QUrl::TolerantMode) );
+}
+
+
+void VescInterface::setLastCaliBleName(QString name)
+{
+    mLastCaliBleName = name;
+}
+
+QString VescInterface::getLastCaliBleName()
+{
+    return mLastCaliBleName;
+}
+
+#ifdef HAS_BLUETOOTH
+void VescInterface::reconnectWhenDisconnect()
+{
+    calibikeIsConnected = isPortConnected();
+
+    switch (calibikeAutoReconnectState) {
+        case ENABLED: {
+            if (deviceLostConnection())
+            {
+                mBleUart->startConnect(mLastBleAddr);
+            }
+        } break;
+        case DISABLED: {
+        } break;
+    default:
+        break;
+    }
+
+    if (calibikeIsConnected)
+    {
+        calibikeWasConnected = true;
+        calibikeAutoReconnectState = ENABLED;
+    }
+    else {
+        calibikeIsConnected = false;
+    }
+}
+
+void VescInterface::setAutoReconnectedState(bool state)
+{
+    calibikeAutoReconnectState =(autoReconnectState) state;
+}
+
+bool VescInterface::deviceLostConnection()
+{
+    bool resp;
+    bool calibikeIsNotConnected;
+    calibikeIsNotConnected = !isPortConnected();
+    resp = (calibikeWasConnected && calibikeIsNotConnected);
+    return resp;
+}
+#endif
+
+void VescInterface::timerStatusTimeout()
+{
+#ifdef HAS_BLUETOOTH
+    CALIBIKE_LOGGING_VALUES loggingValues;
+    loggingValues.code = CONSOLE_LOGGING_TIMER_DEVICE_STATUS;
+    loggingValues.connectedState = this->isPortConnected();
+    emit mCommands->printCalibikeLogging(loggingValues);
+#endif
+}
+
+bool VescInterface::getKeepAutoScan()
+{
+    if ( (mLastBleAddr != "") && isPortConnected() )
+    {
+        mKeepAutoScan = false;
+    }
+    else if ( (mLastBleAddr != "") && !(isPortConnected()) )
+    {
+        mKeepAutoScan = true;
+    }
+    return mKeepAutoScan;
+}
+
+int VescInterface::processAppLaunchState()
+{
+    switch (mAppLaunchState) {
+        case 0: { // NEVER CONNECTED
+            if (mLastBleAddr != "") {
+                mAppLaunchState = 1;
+            }
+        } break;
+
+        case 1: { // PREVIOUSLY CONNECTED
+
+        } break;
+    }
+    return mAppLaunchState;
+}
+
+
+void VescInterface::bleAddDeviceCalibike(QString devAddress)
+{
+    if (mAppLaunchState == 1)
+    {
+        if (devAddress == mLastBleAddr)
+        {
+            emit bleVescFound();
+        }
+    }
+}
+
+
+void VescInterface::getDeviceMovementState()
+{
+    int sampleRateInSeconds = 10; // This value must match with interval at movingSensingTimer
+    int numberOfIterations = 60*5/sampleRateInSeconds;
+    if (mGPSvalues.gVel > 0)
+    {
+        movingPoints += 1;
+    }
+
+    movingIterations += 1;
+
+    if (movingIterations == numberOfIterations)  // Take sample
+    {
+        if (movingPoints > numberOfIterations) // Is device have been moved in all sample slot
+        {
+             deviceMovingState = true;
+        }
+        else {
+            deviceMovingState = false;
+        }
+        movingIterations = 0;
+        movingPoints = 0;
+    }
+
+    qDebug() << "Moving iterations " + QString::number(movingIterations) + " Moving points " + QString::number(movingPoints);
+    qDebug() << "Device moving state " + QString::number(deviceMovingState);
+}
+
+bool VescInterface::isDeviceMoving()
+{
+    return deviceMovingState;
 }

@@ -103,6 +103,12 @@ signals:
     void deserializeConfigFailed(bool isMc, bool isApp);
     void canFrameRx(QByteArray data, quint32 id, bool isExtended);
 
+    void verifyPassword(bool response, bool unlockFirst);
+    void systemLocked(bool issystemLocked);
+    void valuesGpsReceived(GPS_VALUES values);
+    void printCalibikeLogging(CALIBIKE_LOGGING_VALUES values);
+
+
 public slots:
     void processPacket(QByteArray data);
 
@@ -210,6 +216,11 @@ private:
     int mTimeoutDecChuk;
     int mTimeoutDecBalance;
     int mTimeoutPingCan;
+
+    QString consoleMessage;
+    bool isPwdSaved;
+    bool unlockFirst;
+    bool isSystemLocked;
 
 };
 

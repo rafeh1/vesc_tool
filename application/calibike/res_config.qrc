@@ -52,5 +52,6 @@
         <file>res/config/5.01/info.xml</file>
         <file>res/config/5.01/parameters_appconf.xml</file>
         <file>res/config/5.01/parameters_mcconf.xml</file>
+	<file>res/calibike_logo_mobile.png</file>
     </qresource>
 </RCC>

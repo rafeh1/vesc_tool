@@ -32,7 +32,19 @@ Item {
     property Commands mCommands: VescIf.commands()
     property alias disconnectButton: disconnectButton
     property bool isHorizontal: width > height
-    signal requestOpenControls()
+    property int appLaunchState
+    property bool connectedButtonManual: false
+
+    Component.onCompleted: {
+        appLaunchState = VescIf.processAppLaunchState()
+
+        if (appLaunchState == 1)
+            if (VescIf.getKeepAutoScan()) {
+                connectedButtonManual = false
+                scanButton.enabled = false
+                mBle.startScan()
+            }
+    }
 
     ScrollView {
         anchors.fill: parent
@@ -52,7 +64,7 @@ Item {
                 Layout.preferredWidth: Math.min(topItem.width, topItem.height)
                 Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                source: "qrc:/res/logo_white.png"
+                source: "qrc:/res/calibike_logo_mobile.png"
             }
 
             GroupBox {
@@ -139,6 +151,7 @@ Item {
 
                         onClicked: {
                             VescIf.disconnectPort()
+                            VescIf.setAutoReconnectedState(1) // 1 = DISABLED
                         }
                     }
 
@@ -154,259 +167,16 @@ Item {
                             if (bleItems.rowCount() > 0) {
                                 connectButton.enabled = false
                                 VescIf.connectBle(bleItems.get(bleBox.currentIndex).value)
+                                VescIf.setLastCaliBleName(bleItems.get(bleBox.currentIndex).rawname)
+                                connectedButtonManual = true
                             }
-                        }
-                    }
-                }
-            }
-
-            GroupBox {
-                title: qsTr("Configuration Wizards")
-                Layout.fillWidth: true
-                Layout.preferredHeight: isHorizontal ? bleConnBox.height : -1
-
-                ColumnLayout {
-                    anchors.topMargin: -5
-                    anchors.bottomMargin: -5
-                    anchors.fill: parent
-                    spacing: isHorizontal ? -5 : -10
-
-                    Button {
-                        text: "Motors (FOC)"
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-
-                        onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("FOC Setup Wizard",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to run this wizard.", false, false)
-                            } else {
-                                wizardFoc.openDialog()
-                            }
+                            VescIf.setAutoReconnectedState(0) // 0 = ENABLED
                         }
                     }
 
-                    Button {
-                        text: "Input"
-                        Layout.fillWidth: true
-
-                        onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("Input Setup Wizard",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to run this wizard.", false, false)
-                            } else {
-                                // Something in the opendialog function causes a weird glitch, probably
-                                // caused by the eventloop in the can scan function. Disabling the button
-                                // seems to help. TODO: figure out what the actual problem is.
-                                enabled = false
-                                wizardInput.openDialog()
-                                enabled = true
-                            }
-                        }
-                    }
-
-                    Button {
-                        id: nrfPairButton
-                        text: "NRF Quick Pair"
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-
-                        onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("NRF Quick Pair",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to quick pair an NRF-based remote.", false, false)
-                            } else {
-                                nrfPairStartDialog.open()
-                            }
-                        }
-                    }
-
-                    NrfPair {
-                        id: nrfPair
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-                        visible: false
-                        hideAfterPair: true
-                    }
-
-                    Item {
-                        visible: isHorizontal
-                        Layout.fillHeight: true
-                    }
-                }
-            }
-
-            GroupBox {
-                id: canFwdBox
-                Layout.preferredHeight: isHorizontal ? toolsBox.height : -1
-                title: qsTr("CAN Forwarding")
-                Layout.fillWidth: true
-
-                ColumnLayout {
-                    anchors.topMargin: -5
-                    anchors.bottomMargin: -5
-                    anchors.fill: parent
-                    spacing: -10
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: isHorizontal ? 5 : 0
-
-                        ComboBox {
-                            id: canIdBox
-                            Layout.fillWidth: true
-
-                            textRole: "key"
-                            model: ListModel {
-                                id: canItems
-                            }
-
-                            onCurrentIndexChanged: {
-                                if (fwdCanBox.checked && canItems.rowCount() > 0) {
-                                    mCommands.setCanSendId(canItems.get(canIdBox.currentIndex).value)
-                                }
-                            }
-                        }
-
-                        CheckBox {
-                            id: fwdCanBox
-                            text: qsTr("Activate")
-                            enabled: canIdBox.currentIndex >= 0 && canIdBox.count > 0
-
-                            onClicked: {
-                                mCommands.setSendCan(fwdCanBox.checked, canItems.get(canIdBox.currentIndex).value)
-                                canScanButton.enabled = !checked
-                                canAllButton.enabled = !checked
-                            }
-                        }
-                    }
-
-                    ProgressBar {
-                        id: canScanBar
-                        visible: false
-                        Layout.fillWidth: true
-                        indeterminate: true
-                        Layout.preferredHeight: canAllButton.height
-                    }
-
-                    RowLayout {
-                        id: canButtonLayout
-                        Layout.fillWidth: true
-
-                        Button {
-                            id: canAllButton
-                            text: "List All (no Scan)"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-
-                            onClicked: {
-                                canItems.clear()
-                                for (var i = 0;i < 255;i++) {
-                                    var name = "VESC " + i
-                                    canItems.append({ key: name, value: i })
-                                }
-                                canIdBox.currentIndex = 0
-                            }
-                        }
-
-                        Button {
-                            id: canScanButton
-                            text: "Scan CAN Bus"
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 500
-
-                            onClicked: {
-                                canScanBar.indeterminate = true
-                                canButtonLayout.visible = false
-                                canScanBar.visible = true
-                                canItems.clear()
-                                enabled = false
-                                canAllButton.enabled = false
-                                mCommands.pingCan()
-                            }
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                        visible: isHorizontal
-                    }
-                }
-            }
-
-            GroupBox {
-                id: toolsBox
-                title: qsTr("Tools")
-                Layout.fillWidth: true
-
-                ColumnLayout {
-                    anchors.topMargin: -5
-                    anchors.bottomMargin: -5
-                    anchors.fill: parent
-                    spacing: isHorizontal ? -5 : -10
-
-                    Button {
-                        text: "Controls"
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-
-                        onClicked: {
-                            requestOpenControls()
-                        }
-                    }
-
-                    Button {
-                        text: "Directions"
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-
-                        onClicked: {
-                            if (!VescIf.isPortConnected()) {
-                                VescIf.emitMessageDialog("Directions",
-                                                         "You are not connected to the VESC. Please connect in order " +
-                                                         "to map directions.", false, false)
-                            } else {
-                                enabled = false
-                                directionSetupDialog.open()
-                                directionSetup.scanCan()
-                                enabled = true
-                            }
-                        }
-                    }
-
-                    Button {
-                        text: "Backup Configuration(s)"
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-
-                        onClicked: {
-                            backupConfigDialog.open()
-                        }
-                    }
-
-                    Button {
-                        text: "Restore Configuration(s)"
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 500
-
-                        onClicked: {
-                            restoreConfigDialog.open()
-                        }
-                    }
                 }
             }
         }
-    }
-
-    SetupWizardFoc {
-        id: wizardFoc
-    }
-
-    SetupWizardInput {
-        id: wizardInput
     }
 
     PairingDialog {
@@ -445,6 +215,21 @@ Item {
         }
     }
 
+
+    Connections {
+        target: VescIf
+        onBleVescFound: {
+            if ( (appLaunchState == 1) && (connectedButtonManual == false) )
+            {
+                connectButton.enabled = false
+                VescIf.connectBle(VescIf.getLastBleAddr())
+                mBle.stopScan()
+                scanButton.enabled = true
+                scanButton.text = qsTr("Scan")
+            }
+        }
+    }
+
     Connections {
         target: mBle
         onScanDone: {
@@ -461,9 +246,9 @@ Item {
                 var setName = VescIf.getBleName(addr)
                 if (setName.length > 0) {
                     setName += " [" + addr + "]"
-                    bleItems.insert(0, { key: setName, value: addr })
-                } else if (name.indexOf("VESC") !== -1) {
-                    bleItems.insert(0, { key: name2, value: addr })
+                    bleItems.insert(0, { key: setName, value: addr }) // If there is a custom name, set it as top
+                } else if (name.indexOf("VESC") !== -1) { // Found a VESC name, set it in the top
+                    bleItems.insert(0, { key: name2, value: addr, rawname: name })
                 } else {
                     bleItems.append({ key: name2, value: addr })
                 }
@@ -494,12 +279,6 @@ Item {
             canButtonLayout.visible = true
             canScanBar.visible = false
             canScanBar.indeterminate = false
-        }
-
-        onNrfPairingRes: {
-            if (res != 0) {
-                nrfPairButton.visible = true
-            }
         }
     }
 
@@ -548,134 +327,4 @@ Item {
         }
     }
 
-    Dialog {
-        id: directionSetupDialog
-        title: "Direction Setup"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        padding: 10
-
-        width: parent.width - 10
-        closePolicy: Popup.CloseOnEscape
-        x: 5
-        y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
-
-        DirectionSetup {
-            id: directionSetup
-            anchors.fill: parent
-        }
-    }
-
-    Dialog {
-        id: nrfPairStartDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "NRF Pairing"
-
-        parent: ApplicationWindow.overlay
-        x: 10
-        y: topItem.y + topItem.height / 2 - height / 2
-
-        Text {
-            id: detectLambdaLabel
-            color: "white"
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "After clicking OK the VESC will be put in pairing mode for 10 seconds. Switch" +
-                "on your remote during this time to complete the pairing process."
-        }
-
-        onAccepted: {
-            nrfPair.visible = true
-            nrfPairButton.visible = false
-            nrfPair.startPairing()
-        }
-    }
-
-    Dialog {
-        id: backupConfigDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "Backup configuration(s)"
-
-        parent: ApplicationWindow.overlay
-        x: 10
-        y: topItem.y + topItem.height / 2 - height / 2
-
-        Text {
-            color: "white"
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "This will backup the configuration of the connected VESC, as well as for the VESCs " +
-                "connected over CAN-bus. The configurations are stored by VESC UUID. If a backup for a " +
-                "VESC UUID already exists it will be overwritten. Continue?"
-        }
-
-        onAccepted: {
-            progDialog.open()
-            VescIf.confStoreBackup(true, "")
-            progDialog.close()
-        }
-    }
-
-    Dialog {
-        id: restoreConfigDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "Restore configuration backup(s)"
-
-        parent: ApplicationWindow.overlay
-        x: 10
-        y: topItem.y + topItem.height / 2 - height / 2
-
-        Text {
-            color: "white"
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "This will restore the configuration of the connected VESC, as well as the VESCs connected over CAN bus " +
-                "if a backup exists for their UUID in this instance of VESC Tool. If no backup is found for the UUID of " +
-                "the VESCs nothing will be changed. Continue?"
-        }
-
-        onAccepted: {
-            progDialog.open()
-            VescIf.confRestoreBackup(true)
-            progDialog.close()
-        }
-    }
-
-    Dialog {
-        id: progDialog
-        title: "Processing..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: ApplicationWindow.overlay
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
-    }
 }

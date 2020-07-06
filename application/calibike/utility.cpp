@@ -1588,3 +1588,25 @@ bool Utility::configLoadCompatible(VescInterface *vesc, QString &uuidRx)
 
     return res;
 }
+
+
+QString Utility::aboutTextCalibike()
+{
+    return tr("<b>Calibike® Tool %1</b><br>"
+          #if defined(VER_ORIGINAL)
+              "Original Version<br>"
+          #elif defined(VER_PLATINUM)
+              "Platinum Version<br>"
+          #elif defined(VER_GOLD)
+              "Gold Version<br>"
+          #elif defined(VER_SILVER)
+              "Silver Version<br>"
+          #elif defined(VER_BRONZE)
+              "Bronze Version<br>"
+          #elif defined(VER_FREE)
+              "Free of Charge Version<br>"
+          #endif
+              "This application is based on Benjamin Vedder <a href=\"https://vesc-project.com/\">VESC application.</a>"
+              ).
+            arg(QString::number(VT_VERSION, 'f', 2));
+}

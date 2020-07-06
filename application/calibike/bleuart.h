@@ -39,12 +39,14 @@ public:
     Q_INVOKABLE void disconnectBle();
     Q_INVOKABLE bool isConnected();
     Q_INVOKABLE bool isConnecting();
+    Q_INVOKABLE void stopScan();
 
 signals:
     void dataRx(QByteArray data);
     void scanDone(QVariantMap devs, bool done);
     void bleError(QString info);
     void connected();
+    void addDeviceCalibike(QString devaddress);
 
 public slots:
     void writeData(QByteArray data);

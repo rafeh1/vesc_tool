@@ -25,6 +25,8 @@
 #include <QStringList>
 #include <QVector>
 #include <stdint.h>
+#include <QDateTime>
+
 
 typedef struct {
     QString name;
@@ -648,5 +650,94 @@ public:
 };
 
 Q_DECLARE_METATYPE(BALANCE_VALUES)
+
+
+typedef enum {
+    CONSOLE_LOGGING_COMM_GET_VALUES,
+    CONSOLE_LOGGING_COMM_ALIVE,
+    CONSOLE_LOGGING_COMM_PRINT,
+    CONSOLE_LOGGING_COMM_TERMINAL_CMD,
+    CONSOLE_LOGGING_TIMER_DEVICE_STATUS,
+} calibike_logging_console_code;
+
+typedef enum {
+    INITIAL_UNKNOWN = 0,
+    CONNECTED_FROM_PRESING_BUTTON,
+} vescBleState;
+
+
+typedef enum {
+    NEVER_CONNECTED = 0,
+    PREVIOUSLY_CONNECTED,
+} appLaunchState;
+
+typedef enum {
+    ENABLED = 0,
+    DISABLED,
+} autoReconnectState;
+
+struct CALIBIKE_LOGGING_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(QString command MEMBER command)
+
+public:
+    CALIBIKE_LOGGING_VALUES() {
+        command = "";
+        values.v_in = 0.0;
+        values.temp_mos = 0.0;
+        values.temp_mos_1 = 0.0;
+        values.temp_mos_2 = 0.0;
+        values.temp_mos_3 = 0.0;
+        values.temp_motor = 0.0;
+        values.current_motor = 0.0;
+        values.current_in = 0.0;
+        values.id = 0.0;
+        values.iq = 0.0;
+        values.rpm = 0.0;
+        values.duty_now = 0.0;
+        values.amp_hours = 0.0;
+        values.amp_hours_charged = 0.0;
+        values.watt_hours = 0.0;
+        values.watt_hours_charged = 0.0;
+        values.tachometer = 0;
+        values.tachometer_abs = 0;
+        values.position = 0.0;
+        values.fault_code = FAULT_CODE_NONE;
+        values.vesc_id = 0;
+        connectedState = 0;
+    }
+
+    QString command;
+    MC_VALUES values;
+    QTime timestamp;
+    bool connectedState;
+    calibike_logging_console_code code;
+
+};
+
+Q_DECLARE_METATYPE(CALIBIKE_LOGGING_VALUES)
+
+struct GPS_VALUES {
+    Q_GADGET
+
+    Q_PROPERTY(double lon MEMBER lon)
+    Q_PROPERTY(double lat MEMBER lat)
+    Q_PROPERTY(double gVel MEMBER gVel)
+
+public:
+    GPS_VALUES() {
+        lon = 0.0;
+        lat = 0.0;
+        gVel = 0.0;
+    }
+
+    double lon;
+    double lat;
+    double gVel;
+};
+
+Q_DECLARE_METATYPE(GPS_VALUES)
+
 
 #endif // DATATYPES_H

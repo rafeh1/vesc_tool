@@ -58,6 +58,10 @@
 #include <QAndroidJniEnvironment>
 #endif
 
+#ifdef HAS_POS_CALIBIKE
+#include <QGeoPositionInfoSource>
+#endif
+
 class VescInterface : public QObject
 {
     Q_OBJECT
@@ -152,6 +156,16 @@ public:
     Q_INVOKABLE void storeBleName(QString address, QString name);
     Q_INVOKABLE QString getBleName(QString address);
     Q_INVOKABLE QString getLastBleAddr() const;
+
+
+    Q_INVOKABLE void setLastCaliBleName(QString name);
+    Q_INVOKABLE QString getLastCaliBleName();
+
+    // Autoreconnect when in range
+    Q_INVOKABLE bool deviceLostConnection();
+    Q_INVOKABLE void setAutoReconnectedState(bool state);
+
+
 #endif
 
     // Connection
@@ -196,6 +210,29 @@ public:
 
     Q_INVOKABLE bool deserializeFailedSinceConnected();
 
+
+    Q_INVOKABLE bool openConsoleLogFile(QString outDirectory);
+    Q_INVOKABLE void closeConsoleLogFile();
+    Q_INVOKABLE bool isConsoleLogOpen();
+    Q_INVOKABLE int processAppLaunchState();
+    Q_INVOKABLE bool getKeepAutoScan();
+    Q_INVOKABLE QString getLastPwd() const;
+    Q_INVOKABLE void setLastPwd(QString password);
+    Q_INVOKABLE bool validateEmail(QString email);
+    Q_INVOKABLE QString getEmail() const;
+    Q_INVOKABLE void setEmail(QString email);
+    Q_INVOKABLE void sendEmail();
+
+
+    #ifdef HAS_POS_CALIBIKE
+        Q_INVOKABLE void getPosition();
+        Q_INVOKABLE double getGPSLat();
+        Q_INVOKABLE double getGPSLon();
+        Q_INVOKABLE double getGPSSpeed();
+        Q_INVOKABLE void getDeviceMovementState();
+        Q_INVOKABLE bool isDeviceMoving();
+    #endif
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -212,6 +249,9 @@ signals:
     void useImperialUnitsChanged(bool useImperialUnits);
     void configurationChanged();
     void configurationBackupsChanged();
+
+    void calibikePortDisconnect();
+    void bleVescFound();
 
 public slots:
 
@@ -233,6 +273,12 @@ private slots:
 
 #ifdef HAS_BLUETOOTH
     void bleDataRx(QByteArray data);
+
+
+    void reconnectWhenDisconnect();
+    void bleAddDeviceCalibike(QString devaddress);
+    void timerStatusTimeout();
+
 #endif
 
     void timerSlot();
@@ -353,6 +399,36 @@ private:
 
     void updateFwRx(bool fwRx);
     void setLastConnectionType(conn_t type);
+
+
+    QFile mConsoleLogFile;
+// Autoreconnect when in range
+#ifdef HAS_BLUETOOTH
+    QTimer *mTimerFromDisconnect;
+
+    // Autoreconnect when in range
+    bool calibikeIsConnected;
+    bool calibikeWasConnected;
+    autoReconnectState calibikeAutoReconnectState;
+#endif
+
+#ifdef HAS_POS_CALIBIKE
+    QGeoPositionInfoSource *mPosSource;
+    QGeoPositionInfo mLastPos;
+    QDateTime mLastPosTime;
+    GPS_VALUES mGPSvalues;
+#endif
+
+    QTimer *mTimerStatus;
+    QString mLastPwd;
+    QString mLastEmail;
+    bool mKeepAutoScan;
+    int mAppLaunchState;
+    int movingPoints;
+    int movingIterations;
+    bool deviceMovingState;
+    bool buttonPressed;
+    QString mLastCaliBleName;
 
 };
 
