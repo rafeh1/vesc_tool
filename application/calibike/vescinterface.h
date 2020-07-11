@@ -402,6 +402,7 @@ private:
 
 
     QFile mConsoleLogFile;
+    bool mConsoleLoggingPrintHeader;
 // Autoreconnect when in range
 #ifdef HAS_BLUETOOTH
     QTimer *mTimerFromDisconnect;

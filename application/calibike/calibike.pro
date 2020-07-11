@@ -1,6 +1,6 @@
 #VT_VERSION = 0.95
 
-VT_VERSION = 1.00
+VT_VERSION = 1.01
 VT_INTRO_VERSION = 1
 VT_IS_TEST_VERSION = 0
 
@@ -90,7 +90,7 @@ release_android {
     UI_DIR = build/android/obj
 }
 
-DEFINES += USE_MOBILE
+#DEFINES += USE_MOBILE # Debug
 build_mobile {
     DEFINES += USE_MOBILE
 }

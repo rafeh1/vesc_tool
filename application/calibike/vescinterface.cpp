@@ -472,39 +472,54 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     connect(mBleUart, SIGNAL(addDeviceCalibike(QString)), this, SLOT(bleAddDeviceCalibike(QString)));
 
-
+    mConsoleLoggingPrintHeader = false;
     connect(mCommands, &Commands::printCalibikeLogging, [this](CALIBIKE_LOGGING_VALUES loggingValues) {
+        int timestamp;
         if (mConsoleLogFile.isOpen()) {
             auto t = QTime::currentTime();
             QTextStream os(&mConsoleLogFile);
 
+            if (!mConsoleLoggingPrintHeader) {
+                os << "Time, ";
+                os << "Speed (km/h), ";
+                os << "Voltage (V), ";
+                os << "Current (A), ";
+                os << "Power (W): ";
+                os << "Alive: " << "\n";
+                mConsoleLoggingPrintHeader = true;
+            }
+
             /* Cases where connected is not there is because data is coming from process packet
              * If process packet is missing means that device is not connected.
             */
-            os << t.msecsSinceStartOfDay() << "\n";
+            timestamp = t.msecsSinceStartOfDay();
+
             switch (loggingValues.code) {
                 case CONSOLE_LOGGING_TIMER_DEVICE_STATUS: {
-                    os << "CONNECTED: " + QString::number(loggingValues.connectedState) << "\n";
+//                    os << "CONNECTED: " + QString::number(loggingValues.connectedState) << "\n";
                 } break;
                 case CONSOLE_LOGGING_COMM_ALIVE: {
+                    os << timestamp << ", ";
+                    os << 0 << ", ";
+                    os << 0 << ", ";
+                    os << 0 << ", ";
+                    os << 0 << ", ";
                     os << "ALIVE"  << "\n";
                 } break;
                 case CONSOLE_LOGGING_COMM_PRINT: {
-                    os << loggingValues.command << "\n";
+//                    os << loggingValues.command << "\n";
                 } break;
                 case CONSOLE_LOGGING_COMM_TERMINAL_CMD: {
-                    os << loggingValues.command << "\n";
-                    os << "CONNECTED: " + QString::number(this->isPortConnected()) << "\n";
+//                    os << loggingValues.command << ", ";
+//                    os << "CONNECTED: " + QString::number(this->isPortConnected()) << "\n";
                 } break;
                 case CONSOLE_LOGGING_COMM_GET_VALUES: {
-                    os << "Speed (km/h): ";
-                    os << mGPSvalues.gVel << "\n";
-                    os << "Voltage (V): ";
-                    os << loggingValues.values.v_in << "\n";
-                    os << "Current (A): ";
-                    os << loggingValues.values.current_in << "\n";
-                    os << "Power (W): ";
-                    os << (loggingValues.values.current_in * loggingValues.values.v_in) << "\n";
+                    os << timestamp << ", ";
+                    os << mGPSvalues.gVel << ", ";
+                    os << loggingValues.values.v_in << ", ";
+                    os << loggingValues.values.current_in << ", ";
+                    os << (loggingValues.values.current_in * loggingValues.values.v_in) << ", ";
+                    os << "0" << "\n";
                 } break;
             }
             os.flush();
@@ -3495,6 +3510,7 @@ void VescInterface::closeConsoleLogFile()
 {
     if (mConsoleLogFile.isOpen()) {
         mConsoleLogFile.close();
+        mConsoleLoggingPrintHeader = false;
     }
 }
 

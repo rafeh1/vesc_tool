@@ -757,10 +757,6 @@ void Commands::sendTerminalCmdSync(QString cmd)
     vb.vbAppendInt8(COMM_TERMINAL_CMD_SYNC);
     vb.append(cmd.toLatin1());
     emitData(vb);
-
-    CALIBIKE_LOGGING_VALUES logging;
-    logging.code = CONSOLE_LOGGING_COMM_ALIVE;
-    emit printCalibikeLogging(logging);
 }
 
 void Commands::setDutyCycle(double dutyCycle)
@@ -930,6 +926,10 @@ void Commands::sendAlive()
     VByteArray vb;
     vb.vbAppendInt8(COMM_ALIVE);
     emitData(vb);
+
+    CALIBIKE_LOGGING_VALUES logging;
+    logging.code = CONSOLE_LOGGING_COMM_ALIVE;
+    emit printCalibikeLogging(logging);
 }
 
 void Commands::getDecodedPpm()

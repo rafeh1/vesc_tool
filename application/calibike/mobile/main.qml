@@ -61,7 +61,7 @@ ApplicationWindow {
 
                 Image {
                     Layout.preferredWidth: Math.min(parent.width, parent.height)
-                    Layout.preferredHeight: (394 * Layout.preferredWidth) / 1549
+                    Layout.preferredHeight: (394 * Layout.preferredWidth) / 800
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                     source: "qrc:/res/calibike_logo_mobile.png"
                 }

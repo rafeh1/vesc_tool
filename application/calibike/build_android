@@ -2,7 +2,7 @@
 
 set -e
 
-export VT_VERSION=1.00
+export VT_VERSION=1.01
 export ANDROID_HOME=~/Android
 export ANDROID_NDK_HOST=linux-x86_64
 export ANDROID_NDK_PLATFORM=android-23
