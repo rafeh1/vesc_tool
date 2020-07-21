@@ -223,6 +223,7 @@ public:
     Q_INVOKABLE void setEmail(QString email);
     Q_INVOKABLE void sendEmail();
 
+    Q_INVOKABLE void setLastConsoleLogging(CALIBIKE_LOGGING_VALUES loggingValues, GPS_VALUES gpsLoggingValues);
 
     #ifdef HAS_POS_CALIBIKE
         Q_INVOKABLE void getPosition();
@@ -403,6 +404,9 @@ private:
 
     QFile mConsoleLogFile;
     bool mConsoleLoggingPrintHeader;
+    CALIBIKE_LOGGING_VALUES lastConsoleLoggingValues;
+    GPS_VALUES lastConsoleLoggingGPSValues;
+
 // Autoreconnect when in range
 #ifdef HAS_BLUETOOTH
     QTimer *mTimerFromDisconnect;

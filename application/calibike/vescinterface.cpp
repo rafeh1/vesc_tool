@@ -475,6 +475,7 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mConsoleLoggingPrintHeader = false;
     connect(mCommands, &Commands::printCalibikeLogging, [this](CALIBIKE_LOGGING_VALUES loggingValues) {
         int timestamp;
+
         if (mConsoleLogFile.isOpen()) {
             auto t = QTime::currentTime();
             QTextStream os(&mConsoleLogFile);
@@ -499,12 +500,12 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 //                    os << "CONNECTED: " + QString::number(loggingValues.connectedState) << "\n";
                 } break;
                 case CONSOLE_LOGGING_COMM_ALIVE: {
-                    os << timestamp << ", ";
-                    os << 0 << ", ";
-                    os << 0 << ", ";
-                    os << 0 << ", ";
-                    os << 0 << ", ";
-                    os << "ALIVE"  << "\n";
+                    os << timestamp << ";";
+                    os << lastConsoleLoggingGPSValues.gVel << ";";
+                    os << lastConsoleLoggingValues.values.v_in << ";";
+                    os << lastConsoleLoggingValues.values.current_in << ";";
+                    os << (lastConsoleLoggingValues.values.current_in * lastConsoleLoggingValues.values.v_in) << ";";
+                    os << "ALIVE" << ";" << "\n";
                 } break;
                 case CONSOLE_LOGGING_COMM_PRINT: {
 //                    os << loggingValues.command << "\n";
@@ -514,12 +515,14 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 //                    os << "CONNECTED: " + QString::number(this->isPortConnected()) << "\n";
                 } break;
                 case CONSOLE_LOGGING_COMM_GET_VALUES: {
-                    os << timestamp << ", ";
-                    os << mGPSvalues.gVel << ", ";
-                    os << loggingValues.values.v_in << ", ";
-                    os << loggingValues.values.current_in << ", ";
-                    os << (loggingValues.values.current_in * loggingValues.values.v_in) << ", ";
-                    os << "0" << "\n";
+                    os << timestamp << ";";
+                    os << mGPSvalues.gVel << ";";
+                    os << loggingValues.values.v_in << ";";
+                    os << loggingValues.values.current_in << ";";
+                    os << (loggingValues.values.current_in * loggingValues.values.v_in) << ";";
+                    os << "" << ";" << "\n";
+                    setLastConsoleLogging(loggingValues, mGPSvalues);
+
                 } break;
             }
             os.flush();
@@ -3749,4 +3752,10 @@ void VescInterface::getDeviceMovementState()
 bool VescInterface::isDeviceMoving()
 {
     return deviceMovingState;
+}
+
+void VescInterface::setLastConsoleLogging(CALIBIKE_LOGGING_VALUES loggingValues, GPS_VALUES gpsLoggingValues)
+{
+    lastConsoleLoggingValues = loggingValues;
+    lastConsoleLoggingGPSValues = gpsLoggingValues;
 }
